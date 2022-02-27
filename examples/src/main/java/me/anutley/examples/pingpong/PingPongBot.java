@@ -26,6 +26,5 @@ public class PingPongBot {
                             textCommandManager.setGuildPrefix("833042350850441216", "??"); // This is volatile, it needs to be reset after every restart
                         }
                 );
-        System.out.println(commandManager.getTextCommandManager().getGuildsPrefix("833042350850441216"));
     }
 }

@@ -26,8 +26,6 @@ public class CommandListener extends ListenerAdapter {
 
         TextCommand command = manager.getTextCommandManager().getCommandFromEvent(event);
 
-        System.out.println("1");
-
         if (command == null) {
             if (manager.getTextCommandManager().getNoCommandFoundConsumser() != null) {
                 manager.getTextCommandManager().getNoCommandFoundConsumser().accept(event);

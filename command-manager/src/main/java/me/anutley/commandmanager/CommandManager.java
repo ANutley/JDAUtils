@@ -142,7 +142,7 @@ public class CommandManager {
             Guild guild = getJda().getGuildById(entry.getKey());
             if (guild == null) continue;
 
-            guild.updateCommands().addCommands(entry.getValue()).queue(success -> success.forEach(s -> System.out.println(s.getName())));
+            guild.updateCommands().addCommands(entry.getValue()).queue();
         }
         return this;
     }
