@@ -54,6 +54,8 @@ public class CommandListener extends ListenerAdapter {
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         SlashCommand slashCommand = manager.getSlashCommandManager().getCommandFromEvent(event);
 
+        if (slashCommand == null) return;
+
         if (manager.getSlashCommandManager().getPermissionPredicate() != null)
             if (!manager.getSlashCommandManager().getPermissionPredicate().test(event)) {
                 if (manager.getSlashCommandManager().getNoPermissionConsumer() != null)
@@ -73,6 +75,8 @@ public class CommandListener extends ListenerAdapter {
     @Override
     public void onUserContextInteraction(@NotNull UserContextInteractionEvent event) {
         UserContextCommand command = this.manager.getContextCommandManager().getUserCommandFromEvent(event);
+
+        if (command == null) return;
 
         if (manager.getContextCommandManager().getPermissionPredicate() != null)
             if (!manager.getContextCommandManager().getPermissionPredicate().test(event)) {
@@ -94,6 +98,8 @@ public class CommandListener extends ListenerAdapter {
     public void onMessageContextInteraction(@NotNull MessageContextInteractionEvent event) {
         MessageContextCommand command = this.manager.getContextCommandManager().getMessageCommandFromEvent(event);
 
+        if (command == null) return;
+        
         if (manager.getContextCommandManager().getPermissionPredicate() != null)
             if (!manager.getContextCommandManager().getPermissionPredicate().test(event)) {
                 if (manager.getContextCommandManager().getNoPermissionConsumer() != null)
