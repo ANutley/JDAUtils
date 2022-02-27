@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+}
+
+group 'me.anutley'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven {
+        url = "https://repo.anutley.me/snapshots"
+    }
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    implementation "net.dv8tion:JDA:5.0.0-alpha.5"
+//    implementation(project(":command-manager"))
+    implementation "me.anutley:command-manager:1.0-SNAPSHOT"
+    implementation 'ch.qos.logback:logback-classic:1.2.10'
+}
+
+test {
+    useJUnitPlatform()
+}
