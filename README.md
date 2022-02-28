@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    implementation "net.dv8tion:JDA:5.0.0-alpha.5"
+    implementation "net.dv8tion:JDA:5.0.0-alpha.VERSION"
     implementation "me.anutley:command-manager:1.0-SNAPSHOT"
 }
 ```
