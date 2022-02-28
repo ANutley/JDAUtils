@@ -1,5 +1,6 @@
 package me.anutley.commandmanager;
 
+import me.anutley.commandmanager.commands.annotations.Command;
 import me.anutley.commandmanager.commands.application.annotations.GuildCommand;
 import me.anutley.commandmanager.commands.application.context.MessageContextCommand;
 import me.anutley.commandmanager.commands.application.context.UserContextCommand;
@@ -32,9 +33,8 @@ public class ContextCommandManager {
      * @param commandManager An instance of the command manager, used to retrieve things such as the commands package
      */
     public ContextCommandManager(CommandManager commandManager) {
-        List<Class<?>> commandClasses = ReflectionsUtil.getClassesByPackage(commandManager.getCommandsPackage(), Object.class);
 
-        for (Class<?> clazz : commandClasses) {
+        for (Class<?> clazz : commandManager.getCommandClasses()) {
             for (Method method : clazz.getMethods()) {
                 if (method.isAnnotationPresent(JDAMessageContextCommand.class)) {
                     messageContextCommands.add(new MessageContextCommand(method.getAnnotation(JDAMessageContextCommand.class), method));

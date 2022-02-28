@@ -1,5 +1,6 @@
 package me.anutley.examples.interactionsbot;
 
+import me.anutley.commandmanager.commands.annotations.Command;
 import me.anutley.commandmanager.commands.application.annotations.GuildCommand;
 import me.anutley.commandmanager.commands.application.context.annotations.JDAMessageContextCommand;
 import me.anutley.commandmanager.commands.application.context.annotations.JDAUserContextCommand;
@@ -11,10 +12,12 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.utils.TimeFormat;
 
-public class InteractionsCommands {
+@Command // The class must be annotated with this for the Command-Manager to pick it up
+public class InteractionsCommands extends ListenerAdapter {
 
     /*
     The @GuildCommand annotation is used here to register this as a guild-specific command. This is only done here as global interactions

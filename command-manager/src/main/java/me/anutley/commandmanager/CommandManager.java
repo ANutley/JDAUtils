@@ -1,7 +1,9 @@
 package me.anutley.commandmanager;
 
 import me.anutley.commandmanager.commands.CommandListener;
+import me.anutley.commandmanager.commands.annotations.Command;
 import me.anutley.commandmanager.commands.application.slash.SlashCommandData;
+import me.anutley.commandmanager.utils.ReflectionsUtil;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -15,6 +17,7 @@ public class CommandManager {
 
     private final JDA jda;
     private final String commandsPackage;
+    private final List<Class<?>> commandClasses;
     private final TextCommandManager textCommandManager;
     private final SlashCommandManager slashCommandManager;
     private final ContextCommandManager contextCommandManager;
@@ -29,6 +32,7 @@ public class CommandManager {
         this.jda.addEventListener(new CommandListener(this));
 
         this.commandsPackage = commandsPackage;
+        commandClasses = ReflectionsUtil.getClassesWithAnnotationsByPackage(getCommandsPackage(), Command.class);
         this.textCommandManager = new TextCommandManager(this);
         this.slashCommandManager = new SlashCommandManager(this);
         this.contextCommandManager = new ContextCommandManager(this);
@@ -47,6 +51,14 @@ public class CommandManager {
      */
     public String getCommandsPackage() {
         return commandsPackage;
+    }
+
+    /**
+     *
+     * @return The list of classes in the commands package
+     */
+    public List<Class<?>> getCommandClasses() {
+        return commandClasses;
     }
 
     /**

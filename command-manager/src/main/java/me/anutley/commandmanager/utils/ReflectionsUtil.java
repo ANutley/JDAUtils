@@ -6,6 +6,7 @@ import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,18 +17,18 @@ public class ReflectionsUtil {
     /**
      *
      * @param packageName The package name to search in
-     * @param clazz The class to filter the search by
+     * @param clazz The annotation to filter the search by
      * @return a list of all the classes found from the search
      */
-    public static List<Class<?>> getClassesByPackage(String packageName, Class<?> clazz) {
+    public static List<Class<?>> getClassesWithAnnotationsByPackage(String packageName, Class<? extends Annotation> clazz) {
         Reflections reflect = new Reflections(
                 new ConfigurationBuilder()
                         .forPackages(packageName)
-                        .setScanners(Scanners.Resources, SubTypes.filterResultsBy(c -> true))
+                        .setScanners(Scanners.Resources, Scanners.TypesAnnotated, SubTypes.filterResultsBy(c -> true))
                         .setUrls(ClasspathHelper.forPackage(packageName))
                         .filterInputsBy(new FilterBuilder().includePackage(packageName))
         );
 
-        return new ArrayList<>(reflect.getSubTypesOf(clazz));
+        return new ArrayList<>(reflect.getTypesAnnotatedWith(clazz));
     }
 }

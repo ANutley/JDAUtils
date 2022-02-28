@@ -16,8 +16,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
     implementation "net.dv8tion:JDA:5.0.0-alpha.9"
-//    implementation(project(":command-manager"))
-    implementation "me.anutley:command-manager:1.0-SNAPSHOT"
+    implementation "me.anutley:command-manager:1.0-SNAPSHOT" //    implementation(project(":command-manager")) (used for local testing)
     implementation 'ch.qos.logback:logback-classic:1.2.10'
 }
 

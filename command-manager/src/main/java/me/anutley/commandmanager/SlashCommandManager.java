@@ -35,9 +35,8 @@ public class SlashCommandManager {
      */
     public SlashCommandManager(CommandManager commandManager) {
         this.commandManager = commandManager;
-        List<Class<?>> commandClasses = ReflectionsUtil.getClassesByPackage(commandManager.getCommandsPackage(), Object.class);
 
-        for (Class<?> clazz : commandClasses) {
+        for (Class<?> clazz : commandManager.getCommandClasses()) {
             for (Method method : clazz.getMethods()) {
                 if (method.isAnnotationPresent(JDASlashCommand.class)) {
                     commands.add(new SlashCommand(method.getAnnotation(JDASlashCommand.class), method));

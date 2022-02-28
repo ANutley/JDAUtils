@@ -1,5 +1,6 @@
 package me.anutley.commandmanager;
 
+import me.anutley.commandmanager.commands.annotations.Command;
 import me.anutley.commandmanager.commands.text.TextCommand;
 import me.anutley.commandmanager.commands.text.annotations.JDATextCommand;
 import me.anutley.commandmanager.utils.ReflectionsUtil;
@@ -29,9 +30,8 @@ public class TextCommandManager {
      * @param commandManager An instance of the command manager, used to retrieve things such as the commands package
      */
     public TextCommandManager(CommandManager commandManager) {
-        List<Class<?>> commandClasses = ReflectionsUtil.getClassesByPackage(commandManager.getCommandsPackage(), Object.class);
 
-        for (Class<?> clazz : commandClasses) {
+        for (Class<?> clazz : commandManager.getCommandClasses()) {
             for (Method method : clazz.getMethods()) {
                 if (method.isAnnotationPresent(JDATextCommand.class)) {
                     commands.add(new TextCommand(method.getAnnotation(JDATextCommand.class), method));
@@ -183,7 +183,6 @@ public class TextCommandManager {
 
     /**
      *
-     * @param args - The arguments from the {@link MessageReceivedEvent} which should be used to search for the command
      * @return the text-command which has been found
      */
     public TextCommand getCommandFromEvent(MessageReceivedEvent event) {
