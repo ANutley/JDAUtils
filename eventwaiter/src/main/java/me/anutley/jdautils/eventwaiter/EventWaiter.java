@@ -6,10 +6,8 @@ import net.dv8tion.jda.api.events.ShutdownEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -22,7 +20,7 @@ import java.util.function.Predicate;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class EventWaiter implements EventListener {
 
-    private final Map<Class<?>, List<WaitingEvent>> eventsToWaitFor = new HashMap<>();
+    private final Map<Class<?>, Set<WaitingEvent>> eventsToWaitFor = new HashMap<>();
     private final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 
 
@@ -45,7 +43,7 @@ public class EventWaiter implements EventListener {
                                        Runnable actionOnTimeout
     ) {
         WaitingEvent waitingEvent = new WaitingEvent(actionToRun, predicateToCheck);
-        List<WaitingEvent> events = eventsToWaitFor.computeIfAbsent(eventClass, c -> new ArrayList<>());
+        Set<WaitingEvent> events = eventsToWaitFor.computeIfAbsent(eventClass, c -> ConcurrentHashMap.newKeySet());
         events.add(waitingEvent);
 
         if (timeout < 0 || units == null) return;
@@ -79,7 +77,7 @@ public class EventWaiter implements EventListener {
 
     @Override
     public void onEvent(@NotNull GenericEvent event) {
-        List<WaitingEvent> events = eventsToWaitFor.get(event.getClass());
+        Set<WaitingEvent> events = eventsToWaitFor.get(event.getClass());
 
         if (events == null) return;
 
