@@ -1,4 +1,5 @@
-rootProject.name = 'command-manager'
+rootProject.name = 'jdautils'
 include 'examples'
-include 'command-manager'
+include 'commands'
+include 'eventwaiter'
 

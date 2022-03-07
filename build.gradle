@@ -3,19 +3,99 @@ plugins {
     id 'maven-publish'
 }
 
-group 'me.anutley'
-version '1.0-SNAPSHOT'
+allprojects {
 
-repositories {
-    mavenCentral()
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
+
+    group 'me.anutley'
+    version '1.0-SNAPSHOT'
+
+    ext {
+        dependencies {
+
+            // Creates shortcuts to avoid repeating dependencies throughout modules
+            jda = { [group: 'net.dv8tion', name: 'JDA', version: "5.0.0-alpha.9"] }
+            logback = { [group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.10'] }
+            reflections = { [group: 'org.reflections', name: 'reflections', version: '0.10.2'] }
+
+            // Sets the artifact id based on module name, i.e the root project will be called 'jdautils' whereas the commands module will be called 'jdautils-commands'
+            artifactId = (rootProject == project ? project.name : "$rootProject.name-$project.name").toLowerCase(Locale.ROOT)
+        }
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    publishing {
+
+        publications {
+            maven(MavenPublication) {
+                groupId = project.group
+                artifactId = project.artifactId
+                version = project.version
+            }
+        }
+
+        def type = version.toString().endsWith("SNAPSHOT") ? "snapshots" : "releases"
+        // Decides whether its a snapshot or release
+
+        repositories {
+            maven {
+                url = "https://repo.anutley.me/" + type
+                credentials {
+                    username = System.getenv("MAVEN_USERNAME")
+                    password = System.getenv("MAVEN_PASSWORD")
+                }
+            }
+        }
+    }
+
+    rootProject.subprojects.forEach { submodule ->
+        project.ext."$submodule.name" = { project(":$submodule.name") }
+    }
+
+    java {
+        sourceCompatibility = targetCompatibility = JavaVersion.VERSION_11
+    }
+
 }
 
-dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+subprojects {
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                from components.java
+            }
+        }
+    }
+
+    afterEvaluate {
+        rootProject.dependencies.implementation project
+    }
 }
 
+publishing {
+    publications {
+        maven(MavenPublication) {
+            // Creates a pom for the base module, to automagically depend on ALL the submodules if no specific one is provided
+            pom.withXml {
+                def repo = asNode().appendNode('repositories').appendNode('repository')
 
-test {
-    useJUnitPlatform()
+                repo.appendNode('name', 'anutley-maven')
+                repo.appendNode('id', 'anutley-maven')
+                repo.appendNode('url', "https://repo.anutley.me/")
+
+                def deps = asNode().appendNode('dependencies')
+                configurations.implementation.allDependencies.each {
+                    def dep = deps.appendNode('dependency')
+                    dep.appendNode('groupId', it.group)
+                    dep.appendNode('artifactId', it instanceof ProjectDependency ? it.dependencyProject.artifactId : it.name)
+                    dep.appendNode('version', it.version)
+                    dep.appendNode('scope', 'compile')
+                }
+            }
+        }
+    }
 }
