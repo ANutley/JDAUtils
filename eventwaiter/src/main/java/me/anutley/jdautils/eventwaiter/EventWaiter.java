@@ -50,7 +50,7 @@ public class EventWaiter implements EventListener {
 
         scheduledExecutor.schedule(() -> {
             try {
-                if (actionOnTimeout == null || !events.remove(waitingEvent)) return;
+                if (!events.remove(waitingEvent) || actionOnTimeout == null) return;
                 actionOnTimeout.run();
             } catch (Exception e) {
                 e.printStackTrace();
