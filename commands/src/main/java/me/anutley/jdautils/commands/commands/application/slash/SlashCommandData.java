@@ -46,7 +46,7 @@ public class SlashCommandData {
 
         for (SlashCommandData command : commands) {
             if (sortedList.get(command.getGuildId()) == null) {
-                sortedList.put(command.getGuildId(), new ArrayList<>() {{
+                sortedList.put(command.getGuildId(), new ArrayList<CommandData>() {{
                             add(command.getCommandData());
                         }}
                 );

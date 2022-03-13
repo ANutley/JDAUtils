@@ -119,7 +119,7 @@ public class CommandManager {
         List<SlashCommandData> slashCommands = slashCommandManager.getCommandData();
         List<SlashCommandData> contextCommands = contextCommandManager.getCommandData();
 
-        List<SlashCommandData> allCommands = new ArrayList<>() {{
+        List<SlashCommandData> allCommands = new ArrayList<SlashCommandData>() {{
             addAll(slashCommands);
             addAll(contextCommands);
         }};
