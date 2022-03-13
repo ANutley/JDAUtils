@@ -57,7 +57,7 @@ allprojects {
     }
 
     java {
-        sourceCompatibility = targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
     }
 
 }
