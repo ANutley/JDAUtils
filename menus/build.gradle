@@ -1,0 +1,4 @@
+dependencies {
+    compileOnly jda()
+    compileOnly project(":eventwaiter")
+}

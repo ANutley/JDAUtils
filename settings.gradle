@@ -2,4 +2,5 @@ rootProject.name = 'jdautils'
 include 'examples'
 include 'commands'
 include 'eventwaiter'
+include 'menus'
 
