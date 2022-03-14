@@ -1,4 +1,4 @@
-package me.anutley.jdautils.examples.interactionsbot;
+package me.anutley.jdautils.examples.interactions;
 
 import me.anutley.jdautils.commands.commands.annotations.Command;
 import me.anutley.jdautils.commands.commands.application.annotations.GuildCommand;
