@@ -101,7 +101,7 @@ public class ContextCommandManager {
             String guildId = null;
 
             if (messageContextCommand.getCommandMethod().isAnnotationPresent(GuildCommand.class))
-                guildId = messageContextCommand.getCommandMethod().getAnnotation(GuildCommand.class).guildId();
+                guildId = messageContextCommand.getCommandMethod().getAnnotation(GuildCommand.class).value();
 
             CommandData data = Commands.message(messageContextCommand.getCommand().name());
 
@@ -114,7 +114,7 @@ public class ContextCommandManager {
             String guildId = null;
 
             if (userContextCommand.getCommandMethod().isAnnotationPresent(GuildCommand.class))
-                guildId = userContextCommand.getCommandMethod().getAnnotation(GuildCommand.class).guildId();
+                guildId = userContextCommand.getCommandMethod().getAnnotation(GuildCommand.class).value();
 
             CommandData data = Commands.user(userContextCommand.getCommand().name());
 

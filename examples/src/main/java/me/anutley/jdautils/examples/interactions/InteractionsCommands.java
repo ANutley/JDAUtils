@@ -23,7 +23,7 @@ public class InteractionsCommands extends ListenerAdapter {
     The @GuildCommand annotation is used here to register this as a guild-specific command. This is only done here as global interactions
     take around 1 hour to be registered everywhere by Discord. If you want to create a global command, omit this annotation.
      */
-    @GuildCommand(guildId = "833042350850441216")
+    @GuildCommand("833042350850441216")
     @JDASlashCommand(name = "avatar", description = "Get the avatar of a user!")
     public void slashCommand(
             SlashCommandInteractionEvent event,
@@ -32,7 +32,7 @@ public class InteractionsCommands extends ListenerAdapter {
         event.reply(user.getEffectiveAvatarUrl()).queue();
     }
 
-    @GuildCommand(guildId = "833042350850441216")
+    @GuildCommand("833042350850441216")
     @JDAUserContextCommand(name = "User Info", description = "Gets some basic user related information")
     public void userContextCommand(UserContextInteractionEvent event) {
         User user = event.getTarget();
@@ -48,7 +48,7 @@ public class InteractionsCommands extends ListenerAdapter {
         event.replyEmbeds(embedBuilder.build()).queue();
     }
 
-    @GuildCommand(guildId = "833042350850441216")
+    @GuildCommand("833042350850441216")
     @JDAMessageContextCommand(name = "Message Info", description = "Gets some basic message related information")
     public void messageContextCommand(MessageContextInteractionEvent event) {
         Message message = event.getTarget();

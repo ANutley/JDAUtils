@@ -109,7 +109,7 @@ public class SlashCommandManager {
 
             for (SlashCommand slashCommand : SlashCommand.getCommandsFromBase(commands, base)) {
                 if (slashCommand.getCommandMethod().isAnnotationPresent(GuildCommand.class))
-                    guildId = slashCommand.getCommandMethod().getAnnotation(GuildCommand.class).guildId();
+                    guildId = slashCommand.getCommandMethod().getAnnotation(GuildCommand.class).value();
 
                 LinkedList<SlashCommandOption> options = new LinkedList<>(SlashCommandOption.getOptions(slashCommand));
 

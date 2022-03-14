@@ -12,5 +12,5 @@ public @interface GuildCommand {
     /**
      * @return returns the id of the guild that this command should be created in
      */
-    String guildId();
+    String value();
 }
