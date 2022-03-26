@@ -97,7 +97,11 @@ public class SlashCommand {
                     if (slashOption.getOptionParameter().getType().equals(StageChannel.class))
                         object = event.getOption(slashOption.getOption().name()).getAsStageChannel();
 
+                    break;
                 }
+
+                case ATTACHMENT:
+                    object = event.getOption(slashOption.getOption().name()).getAsAttachment();
             }
 
             objects.add(event.getOption(slashOption.getOption().name()) != null ? object : null);
