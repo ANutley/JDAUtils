@@ -1,4 +1,10 @@
 # JDAUtils
+![](https://repo.anutley.me/api/badge/latest/releases/me/anutley/jdautils?color=40c14a&name=JDAUtils&prefix=v)
+![](https://repo.anutley.me/api/badge/latest/snapshots/me/anutley/jdautils?color=40c14a&name=JDAUtils&prefix=v)
+
+<sup> <sub> Latest Version | Latest Snapshot Version </sub> </sup>
+
+--- 
 
 **WARNING - There will likely be bugs as this library is in alpha development, if you find any please report them on
 GitHub**
