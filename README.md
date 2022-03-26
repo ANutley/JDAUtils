@@ -14,7 +14,7 @@ submit a pull request.
 repositories {
     mavenCentral()
     maven {
-        url = "https://repo.anutley.me/snapshots"
+        url = "https://repo.anutley.me/releases"
     }
 }
 
@@ -30,7 +30,7 @@ You can also specify certain modules to include, for example
 repositories {
     mavenCentral()
     maven {
-        url = "https://repo.anutley.me/snapshots"
+        url = "https://repo.anutley.me/releases"
     }
 }
 
@@ -39,6 +39,7 @@ dependencies {
     implementation "me.anutley:jdautils-commands:VERSION"
 }
 ```
+(You can use the url `https://repo.anutley.me/snapshots` for snapshot builds instead)
 
 ---
 
