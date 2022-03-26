@@ -29,17 +29,19 @@ allprojects {
     }
 
     publishing {
+        if (project.getName() != "examples") {
 
-        publications {
-            maven(MavenPublication) {
-                groupId = project.group
-                artifactId = project.artifactId
-                version = project.version
+            publications {
+                maven(MavenPublication) {
+                    groupId = project.group
+                    artifactId = project.artifactId
+                    version = project.version
+                }
             }
         }
 
-        def type = version.toString().endsWith("SNAPSHOT") ? "snapshots" : "releases"
         // Decides whether its a snapshot or release
+        def type = version.toString().endsWith("SNAPSHOT") ? "snapshots" : "releases"
 
         repositories {
             maven {
@@ -63,17 +65,21 @@ allprojects {
 }
 
 subprojects {
-    publishing {
-        publications {
-            maven(MavenPublication) {
-                from components.java
+
+    if (project.getName() != "examples") {
+        publishing {
+            publications {
+                maven(MavenPublication) {
+                    from components.java
+                }
             }
+        }
+
+        afterEvaluate {
+            rootProject.dependencies.implementation project
         }
     }
 
-    afterEvaluate {
-        rootProject.dependencies.implementation project
-    }
 }
 
 publishing {
