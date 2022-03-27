@@ -1,11 +1,10 @@
-package me.anutley.jdautils.commands.commands;
+package me.anutley.jdautils.commands;
 
-import me.anutley.jdautils.commands.CommandManager;
-import me.anutley.jdautils.commands.commands.annotations.GuildOnly;
-import me.anutley.jdautils.commands.commands.application.context.MessageContextCommand;
-import me.anutley.jdautils.commands.commands.application.context.UserContextCommand;
-import me.anutley.jdautils.commands.commands.application.slash.SlashCommand;
-import me.anutley.jdautils.commands.commands.text.TextCommand;
+import me.anutley.jdautils.commands.annotations.GuildOnly;
+import me.anutley.jdautils.commands.application.context.MessageContextCommand;
+import me.anutley.jdautils.commands.application.context.UserContextCommand;
+import me.anutley.jdautils.commands.application.slash.SlashCommand;
+import me.anutley.jdautils.commands.text.TextCommand;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
@@ -40,7 +39,7 @@ public class CommandListener extends ListenerAdapter {
                 return;
             }
 
-        if (command.getCommandMethod().isAnnotationPresent(GuildOnly.class) && !event.isFromGuild()) {
+        if (command.getMethod().isAnnotationPresent(GuildOnly.class) && !event.isFromGuild()) {
             if (manager.getTextCommandManager().getNotInGuildConsumer() != null)
                 manager.getTextCommandManager().getNotInGuildConsumer().accept(event);
             return;
@@ -63,7 +62,7 @@ public class CommandListener extends ListenerAdapter {
                 return;
             }
 
-        if (slashCommand.getCommandMethod().isAnnotationPresent(GuildOnly.class) && !event.isFromGuild()) {
+        if (slashCommand.getMethod().isAnnotationPresent(GuildOnly.class) && !event.isFromGuild()) {
             if (manager.getSlashCommandManager().getNotInGuildConsumer() != null)
                 manager.getSlashCommandManager().getNotInGuildConsumer().accept(event);
             return;
@@ -85,7 +84,7 @@ public class CommandListener extends ListenerAdapter {
                 return;
             }
 
-        if (command.getCommandMethod().isAnnotationPresent(GuildOnly.class) && !event.isFromGuild()) {
+        if (command.getMethod().isAnnotationPresent(GuildOnly.class) && !event.isFromGuild()) {
             if (manager.getContextCommandManager().getNotInGuildConsumer() != null)
                 manager.getContextCommandManager().getNotInGuildConsumer().accept(event);
             return;
@@ -107,7 +106,7 @@ public class CommandListener extends ListenerAdapter {
                 return;
             }
 
-        if (command.getCommandMethod().isAnnotationPresent(GuildOnly.class) && !event.isFromGuild()) {
+        if (command.getMethod().isAnnotationPresent(GuildOnly.class) && !event.isFromGuild()) {
             if (manager.getContextCommandManager().getNotInGuildConsumer() != null)
                 manager.getContextCommandManager().getNotInGuildConsumer().accept(event);
             return;

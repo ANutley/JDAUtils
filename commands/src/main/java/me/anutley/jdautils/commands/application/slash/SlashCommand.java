@@ -1,53 +1,41 @@
-package me.anutley.jdautils.commands.commands.application.slash;
+package me.anutley.jdautils.commands.application.slash;
 
-import me.anutley.jdautils.commands.commands.application.slash.annotations.JDASlashCommand;
+import me.anutley.jdautils.commands.Command;
+import me.anutley.jdautils.commands.annotations.CommandMeta;
+import me.anutley.jdautils.commands.application.slash.annotations.JDASlashCommand;
+import me.anutley.jdautils.commands.events.SlashCommandEvent;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-public class SlashCommand {
+public class SlashCommand extends Command<JDASlashCommand, SlashCommandInteractionEvent> {
 
-    private final JDASlashCommand command;
-    private final Method commandMethod;
-
-    /**
-     * @param command       The annotation that the command method has, to retrieve information such as the name or description
-     * @param commandMethod The method which correlates to this command
-     */
     public SlashCommand(JDASlashCommand command, Method commandMethod) {
-        this.command = command;
-        this.commandMethod = commandMethod;
+        super(command, commandMethod);
     }
 
-    /**
-     * @return the annotation that the command method has
-     */
-    public JDASlashCommand getCommand() {
-        return command;
+    @Override
+    public HashMap<String, String> getMetaTags() {
+        HashMap<String, String> metaTags = new HashMap<>();
+
+        for (CommandMeta commandMeta : getAnnotation().meta())
+            metaTags.put(commandMeta.key(), commandMeta.value());
+
+        return metaTags;
     }
 
-    /**
-     * @return the method which correlates to this command
-     */
-    public Method getCommandMethod() {
-        return commandMethod;
-    }
-
-    /**
-     * This method is used to invoke the command method with the correct arguments
-     *
-     * @param event The event which should be used to invoke the command method
-     */
+    @Override
     public void execute(SlashCommandInteractionEvent event) {
 
         LinkedList<SlashCommandOption> options = new LinkedList<>(SlashCommandOption.getOptions(this));
 
         ArrayList<Object> objects = new ArrayList<>();
-        objects.add(event);
+        objects.add(new SlashCommandEvent(event, this));
 
         for (SlashCommandOption slashOption : options) {
 
@@ -107,29 +95,43 @@ public class SlashCommand {
             objects.add(event.getOption(slashOption.getOption().name()) != null ? object : null);
         }
         try {
-            commandMethod.invoke(Class.forName(commandMethod.getDeclaringClass().getName()).getConstructor().newInstance(), objects.toArray());
+            getMethod().invoke(Class.forName(getMethod().getDeclaringClass().getName()).getConstructor().newInstance(), objects.toArray());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
 
+    /**
+     * This is a utility method used to return <em> just </em> the base commands
+     * For example if the list contains commands with the paths '/foo bar1', '/foo bar2', '/foo bar3', '/bar foo', this method will return a list containing 'foo' and 'bar'
+     *
+     * @param commands - The commands to search through
+     * @return - All the base commands the list contains
+     */
     public static List<String> getAllBaseCommands(List<SlashCommand> commands) {
         List<String> baseCommands = new ArrayList<>();
 
         for (SlashCommand command : commands) {
-            String name = command.getCommand().name().split("/")[0];
+            String name = command.getAnnotation().name().split("/")[0];
             if (!baseCommands.contains(name))
                 baseCommands.add(name);
         }
         return baseCommands;
     }
 
+    /**
+     * This method returns the commands from the base, almost the opposite of {@link SlashCommand#getAllBaseCommands(List)}
+     * It will return the {@link SlashCommand}'s which has the base command given
+     * @param commands - The commands to search through
+     * @param base     - The base that you want to search for
+     * @return - A list of slash commands from the specific base command
+     */
     public static List<SlashCommand> getCommandsFromBase(List<SlashCommand> commands, String base) {
         List<SlashCommand> slashCommands = new ArrayList<>();
 
         for (SlashCommand command : commands) {
-            if (command.getCommand().name().split("/")[0].equals(base)) {
+            if (command.getAnnotation().name().split("/")[0].equals(base)) {
                 slashCommands.add(command);
             }
         }

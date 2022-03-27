@@ -1,8 +1,7 @@
 package me.anutley.jdautils.commands;
 
-import me.anutley.jdautils.commands.commands.CommandListener;
-import me.anutley.jdautils.commands.commands.annotations.Command;
-import me.anutley.jdautils.commands.commands.application.slash.SlashCommandData;
+import me.anutley.jdautils.commands.annotations.Command;
+import me.anutley.jdautils.commands.application.slash.SlashCommandData;
 import me.anutley.jdautils.commands.utils.ReflectionsUtil;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;

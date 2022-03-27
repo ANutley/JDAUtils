@@ -1,17 +1,17 @@
 package me.anutley.jdautils.examples.interactions;
 
-import me.anutley.jdautils.commands.commands.annotations.Command;
-import me.anutley.jdautils.commands.commands.application.annotations.GuildCommand;
-import me.anutley.jdautils.commands.commands.application.context.annotations.JDAMessageContextCommand;
-import me.anutley.jdautils.commands.commands.application.context.annotations.JDAUserContextCommand;
-import me.anutley.jdautils.commands.commands.application.slash.annotations.JDASlashCommand;
-import me.anutley.jdautils.commands.commands.application.slash.annotations.SlashOption;
+import me.anutley.jdautils.commands.annotations.Command;
+import me.anutley.jdautils.commands.application.annotations.GuildCommand;
+import me.anutley.jdautils.commands.application.context.annotations.JDAMessageContextCommand;
+import me.anutley.jdautils.commands.application.context.annotations.JDAUserContextCommand;
+import me.anutley.jdautils.commands.application.slash.annotations.JDASlashCommand;
+import me.anutley.jdautils.commands.application.slash.annotations.SlashOption;
+import me.anutley.jdautils.commands.events.MessageContextCommandEvent;
+import me.anutley.jdautils.commands.events.SlashCommandEvent;
+import me.anutley.jdautils.commands.events.UserContextCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.utils.TimeFormat;
@@ -26,16 +26,16 @@ public class InteractionsCommands extends ListenerAdapter {
     @GuildCommand("833042350850441216")
     @JDASlashCommand(name = "avatar", description = "Get the avatar of a user!")
     public void slashCommand(
-            SlashCommandInteractionEvent event,
+            SlashCommandEvent event,
             @SlashOption(name = "user", description = "The user you want to find the avatar of", type = OptionType.USER) User user
     ) {
-        event.reply(user.getEffectiveAvatarUrl()).queue();
+        event.getDiscordEvent().reply(user.getEffectiveAvatarUrl()).queue();
     }
 
     @GuildCommand("833042350850441216")
     @JDAUserContextCommand(name = "User Info", description = "Gets some basic user related information")
-    public void userContextCommand(UserContextInteractionEvent event) {
-        User user = event.getTarget();
+    public void userContextCommand(UserContextCommandEvent event) {
+        User user = event.getDiscordEvent().getTarget();
         EmbedBuilder embedBuilder = new EmbedBuilder()
                 .setTitle(user.getName() + " Info!")
                 .setColor(0x008aff)
@@ -45,13 +45,13 @@ public class InteractionsCommands extends ListenerAdapter {
                 .addField("Discriminator", user.getDiscriminator(), false)
                 .addField("Is User Bot", String.valueOf(user.isBot()), false);
 
-        event.replyEmbeds(embedBuilder.build()).queue();
+        event.getDiscordEvent().replyEmbeds(embedBuilder.build()).queue();
     }
 
     @GuildCommand("833042350850441216")
     @JDAMessageContextCommand(name = "Message Info", description = "Gets some basic message related information")
-    public void messageContextCommand(MessageContextInteractionEvent event) {
-        Message message = event.getTarget();
+    public void messageContextCommand(MessageContextCommandEvent event) {
+        Message message = event.getDiscordEvent().getTarget();
         EmbedBuilder embedBuilder = new EmbedBuilder()
                 .setTitle("Message Info!")
                 .setColor(0x008aff)
@@ -61,7 +61,7 @@ public class InteractionsCommands extends ListenerAdapter {
                 .addField("Is Pinned", String.valueOf(message.isPinned()), false)
                 .addField("Is Webhook Message", String.valueOf(message.isWebhookMessage()), false);
 
-        event.replyEmbeds(embedBuilder.build()).queue();
+        event.getDiscordEvent().replyEmbeds(embedBuilder.build()).queue();
     }
 
 

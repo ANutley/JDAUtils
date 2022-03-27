@@ -1,4 +1,4 @@
-package me.anutley.jdautils.commands.commands.application.slash.annotations;
+package me.anutley.jdautils.commands.application.slash.annotations;
 
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.interactions.commands.OptionType;

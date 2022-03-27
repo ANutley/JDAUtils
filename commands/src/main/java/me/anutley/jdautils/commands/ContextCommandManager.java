@@ -1,11 +1,11 @@
 package me.anutley.jdautils.commands;
 
-import me.anutley.jdautils.commands.commands.application.annotations.GuildCommand;
-import me.anutley.jdautils.commands.commands.application.context.MessageContextCommand;
-import me.anutley.jdautils.commands.commands.application.context.UserContextCommand;
-import me.anutley.jdautils.commands.commands.application.context.annotations.JDAMessageContextCommand;
-import me.anutley.jdautils.commands.commands.application.context.annotations.JDAUserContextCommand;
-import me.anutley.jdautils.commands.commands.application.slash.SlashCommandData;
+import me.anutley.jdautils.commands.application.annotations.GuildCommand;
+import me.anutley.jdautils.commands.application.context.MessageContextCommand;
+import me.anutley.jdautils.commands.application.context.UserContextCommand;
+import me.anutley.jdautils.commands.application.context.annotations.JDAMessageContextCommand;
+import me.anutley.jdautils.commands.application.context.annotations.JDAUserContextCommand;
+import me.anutley.jdautils.commands.application.slash.SlashCommandData;
 import net.dv8tion.jda.api.events.interaction.command.GenericContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
@@ -100,10 +100,10 @@ public class ContextCommandManager {
 
             String guildId = null;
 
-            if (messageContextCommand.getCommandMethod().isAnnotationPresent(GuildCommand.class))
-                guildId = messageContextCommand.getCommandMethod().getAnnotation(GuildCommand.class).value();
+            if (messageContextCommand.getMethod().isAnnotationPresent(GuildCommand.class))
+                guildId = messageContextCommand.getMethod().getAnnotation(GuildCommand.class).value();
 
-            CommandData data = Commands.message(messageContextCommand.getCommand().name());
+            CommandData data = Commands.message(messageContextCommand.getAnnotation().name());
 
             if (guildId == null) commandData.add(new SlashCommandData(guildId, data));
             else commandData.add(new SlashCommandData(guildId, data));
@@ -113,10 +113,10 @@ public class ContextCommandManager {
 
             String guildId = null;
 
-            if (userContextCommand.getCommandMethod().isAnnotationPresent(GuildCommand.class))
-                guildId = userContextCommand.getCommandMethod().getAnnotation(GuildCommand.class).value();
+            if (userContextCommand.getMethod().isAnnotationPresent(GuildCommand.class))
+                guildId = userContextCommand.getMethod().getAnnotation(GuildCommand.class).value();
 
-            CommandData data = Commands.user(userContextCommand.getCommand().name());
+            CommandData data = Commands.user(userContextCommand.getAnnotation().name());
 
             if (guildId == null) commandData.add(new SlashCommandData(guildId, data));
             else commandData.add(new SlashCommandData(guildId, data));
@@ -131,7 +131,7 @@ public class ContextCommandManager {
      * @return The message context command for the event
      */
     public MessageContextCommand getMessageCommandFromEvent(MessageContextInteractionEvent event) {
-        return this.messageContextCommands.stream().filter(messageContextCommand -> messageContextCommand.getCommand().name().equals(event.getName()))
+        return this.messageContextCommands.stream().filter(messageContextCommand -> messageContextCommand.getAnnotation().name().equals(event.getName()))
                 .findFirst()
                 .orElse(null);
     }
@@ -141,7 +141,7 @@ public class ContextCommandManager {
      * @return The user context command for the event
      */
     public UserContextCommand getUserCommandFromEvent(UserContextInteractionEvent event) {
-        return this.userContextCommands.stream().filter(userContextCommand -> userContextCommand.getCommand().name().equals(event.getName()))
+        return this.userContextCommands.stream().filter(userContextCommand -> userContextCommand.getAnnotation().name().equals(event.getName()))
                 .findFirst()
                 .orElse(null);
     }

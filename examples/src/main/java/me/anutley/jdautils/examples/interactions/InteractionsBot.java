@@ -20,7 +20,7 @@ public class InteractionsBot {
 
         jda.awaitReady();
 
-        CommandManager commandManager = new CommandManager(jda, "me.anutley.jdautils.examples.interactionsbot");// The package the commands are in
+        CommandManager commandManager = new CommandManager(jda, "me.anutley.jdautils.examples.interactions");// The package the commands are in
 
         commandManager.registerInteractions(); // This must be done to register all the interactions
 

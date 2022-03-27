@@ -1,4 +1,4 @@
-package me.anutley.jdautils.commands.commands.application.slash;
+package me.anutley.jdautils.commands.application.slash;
 
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 

@@ -1,4 +1,6 @@
-package me.anutley.jdautils.commands.commands.application.slash.annotations;
+package me.anutley.jdautils.commands.application.slash.annotations;
+
+import me.anutley.jdautils.commands.annotations.CommandMeta;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -16,9 +18,9 @@ public @interface JDASlashCommand {
     /**
      * 1-100 characters
      *
-     * @return the description of the slash command
+     * @return the description of the command
      */
-    String description() default "No description";
+    String description() default "";
 
     /**
      * The base description which is set to the slash command if subcommand groups / subcommands are used.
@@ -31,5 +33,16 @@ public @interface JDASlashCommand {
     /**
      * @return the category of the command
      */
-    String category() default "Uncategorised";
+    String category() default "";
+
+    /**
+     * @return the usage of the command
+     */
+    String usage() default "";
+
+    /**
+     * This can be used to set meta information that isn't provided by default. For example a meta key "platform" with the value of "discord" or "minecraft".
+     * @return An array of {@link CommandMeta}
+     */
+    CommandMeta[] meta() default {};
 }

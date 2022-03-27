@@ -1,4 +1,4 @@
-package me.anutley.jdautils.commands.commands.application.annotations;
+package me.anutley.jdautils.commands.application.annotations;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

@@ -1,13 +1,13 @@
 package me.anutley.jdautils.examples.menus;
 
-import me.anutley.jdautils.commands.commands.annotations.Command;
-import me.anutley.jdautils.commands.commands.application.annotations.GuildCommand;
-import me.anutley.jdautils.commands.commands.application.slash.annotations.JDASlashCommand;
+import me.anutley.jdautils.commands.annotations.Command;
+import me.anutley.jdautils.commands.application.annotations.GuildCommand;
+import me.anutley.jdautils.commands.application.slash.annotations.JDASlashCommand;
+import me.anutley.jdautils.commands.events.SlashCommandEvent;
 import me.anutley.jdautils.menus.ButtonMenu;
 import me.anutley.jdautils.menus.SelectionMenu;
 import me.anutley.jdautils.menus.paginator.ButtonPaginator;
 import net.dv8tion.jda.api.MessageBuilder;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
@@ -19,19 +19,19 @@ public class MenuCommands {
 
     @GuildCommand("833042350850441216")
     @JDASlashCommand(name = "button-paginator", description = "A button paginator!")
-    public void buttonPaginator(SlashCommandInteractionEvent event) {
+    public void buttonPaginator(SlashCommandEvent event) {
         new ButtonPaginator.Builder()
                 .setEventWaiter(MenuBot.waiter())
                 .setTimeout(20)
                 .setUnits(TimeUnit.SECONDS)
                 .addPage(new MessageBuilder().setContent("test").build())
                 .addPage(new MessageBuilder().setContent("test2").build())
-                .build().show(event);
+                .build().show(event.getDiscordEvent());
     }
 
     @GuildCommand("833042350850441216")
     @JDASlashCommand(name = "confirm-menu", description = "A confirm menu!")
-    public void buttonMenu(SlashCommandInteractionEvent event) {
+    public void buttonMenu(SlashCommandEvent event) {
         new ButtonMenu.Builder()
                 .setEventWaiter(MenuBot.waiter())
                 .addActionRows(ActionRow.of(
@@ -52,12 +52,12 @@ public class MenuCommands {
                 )
                 .setRecursive(false)
                 .build()
-                .show(event);
+                .show(event.getDiscordEvent());
     }
 
     @GuildCommand("833042350850441216")
     @JDASlashCommand(name = "select-menu", description = "A select menu!")
-    public void selectMenu(SlashCommandInteractionEvent event) {
+    public void selectMenu(SlashCommandEvent event) {
         new SelectionMenu.Builder()
                 .setEventWaiter(MenuBot.waiter())
                 .addActionRows(ActionRow.of(
@@ -71,6 +71,6 @@ public class MenuCommands {
                 })
                 .setInitialMessage(new MessageBuilder().setContent("test").build())
                 .setEphemeral(true)
-                .build().show(event);
+                .build().show(event.getDiscordEvent());
     }
 }

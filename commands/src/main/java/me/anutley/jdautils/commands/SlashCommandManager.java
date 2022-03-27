@@ -1,10 +1,10 @@
 package me.anutley.jdautils.commands;
 
-import me.anutley.jdautils.commands.commands.application.annotations.GuildCommand;
-import me.anutley.jdautils.commands.commands.application.slash.SlashCommand;
-import me.anutley.jdautils.commands.commands.application.slash.SlashCommandData;
-import me.anutley.jdautils.commands.commands.application.slash.SlashCommandOption;
-import me.anutley.jdautils.commands.commands.application.slash.annotations.JDASlashCommand;
+import me.anutley.jdautils.commands.application.annotations.GuildCommand;
+import me.anutley.jdautils.commands.application.slash.SlashCommand;
+import me.anutley.jdautils.commands.application.slash.SlashCommandData;
+import me.anutley.jdautils.commands.application.slash.SlashCommandOption;
+import me.anutley.jdautils.commands.application.slash.annotations.JDASlashCommand;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
@@ -93,10 +93,10 @@ public class SlashCommandManager {
 
 
     /**
-     * @return Returns a list of {@link me.anutley.jdautils.commands.commands.application.slash.SlashCommandData} which contains all the command data
+     * @return Returns a list of {@link me.anutley.jdautils.commands.application.slash.SlashCommandData} which contains all the command data
      */
-    public List<me.anutley.jdautils.commands.commands.application.slash.SlashCommandData> getCommandData() {
-        List<me.anutley.jdautils.commands.commands.application.slash.SlashCommandData> commandData = new ArrayList<>();
+    public List<me.anutley.jdautils.commands.application.slash.SlashCommandData> getCommandData() {
+        List<me.anutley.jdautils.commands.application.slash.SlashCommandData> commandData = new ArrayList<>();
 
         for (String base : SlashCommand.getAllBaseCommands(commands)) {
 
@@ -108,8 +108,8 @@ public class SlashCommandManager {
             String guildId = null;
 
             for (SlashCommand slashCommand : SlashCommand.getCommandsFromBase(commands, base)) {
-                if (slashCommand.getCommandMethod().isAnnotationPresent(GuildCommand.class))
-                    guildId = slashCommand.getCommandMethod().getAnnotation(GuildCommand.class).value();
+                if (slashCommand.getMethod().isAnnotationPresent(GuildCommand.class))
+                    guildId = slashCommand.getMethod().getAnnotation(GuildCommand.class).value();
 
                 LinkedList<SlashCommandOption> options = new LinkedList<>(SlashCommandOption.getOptions(slashCommand));
 
@@ -132,30 +132,30 @@ public class SlashCommandManager {
                     optionDataList.add(optionData);
                 }
 
-                if (!slashCommand.getCommand().baseDescription().equals("No base command description"))
-                    description = slashCommand.getCommand().baseDescription();
+                if (!slashCommand.getAnnotation().baseDescription().equals("No base command description"))
+                    description = slashCommand.getAnnotation().baseDescription();
 
 
-                String[] nameArgs = slashCommand.getCommand().name().split("/");
+                String[] nameArgs = slashCommand.getAnnotation().name().split("/");
 
                 if (nameArgs.length == 1) {
-                    description = slashCommand.getCommand().description();
+                    description = slashCommand.getAnnotation().description();
                 }
 
                 if (nameArgs.length == 2) {
                     if (subcommandDataMap.stream().anyMatch(subcommandData -> subcommandData.getName().equals(nameArgs[0] + "/" + nameArgs[1])))
                         continue;
-                    subcommandDataMap.add(new SubcommandData(nameArgs[1], slashCommand.getCommand().description()).addOptions(optionDataList));
+                    subcommandDataMap.add(new SubcommandData(nameArgs[1], slashCommand.getAnnotation().description()).addOptions(optionDataList));
                 }
 
                 if (nameArgs.length == 3) {
 
                     if (subcommandGroupDataList.stream().noneMatch(subcommandGroupData -> subcommandGroupData.getName().equals(nameArgs[1]))) {
-                        subcommandGroupDataList.add(new SubcommandGroupData(nameArgs[1], slashCommand.getCommand().description()));
+                        subcommandGroupDataList.add(new SubcommandGroupData(nameArgs[1], slashCommand.getAnnotation().description()));
                     }
 
                     subcommandGroupDataList.stream().filter(groupData -> groupData.getName().equals(nameArgs[1]))
-                            .findFirst().ifPresent(subcommandGroupData -> subcommandGroupData.addSubcommands(new SubcommandData(nameArgs[2], slashCommand.getCommand().description()).addOptions(optionDataList)));
+                            .findFirst().ifPresent(subcommandGroupData -> subcommandGroupData.addSubcommands(new SubcommandData(nameArgs[2], slashCommand.getAnnotation().description()).addOptions(optionDataList)));
 
                 }
 
@@ -172,7 +172,7 @@ public class SlashCommandManager {
             }
 
             if (guildId == null)
-                commandData.add(new me.anutley.jdautils.commands.commands.application.slash.SlashCommandData(guildId, data));
+                commandData.add(new me.anutley.jdautils.commands.application.slash.SlashCommandData(guildId, data));
             else commandData.add(new SlashCommandData(guildId, data));
 
         }
@@ -186,7 +186,7 @@ public class SlashCommandManager {
      */
     public SlashCommand getCommandFromEvent(SlashCommandInteractionEvent event) {
 
-        return this.commands.stream().filter(slashCommand -> slashCommand.getCommand().name().equals(event.getCommandPath()))
+        return this.commands.stream().filter(slashCommand -> slashCommand.getAnnotation().name().equals(event.getCommandPath()))
                 .findFirst()
                 .orElse(null);
     }

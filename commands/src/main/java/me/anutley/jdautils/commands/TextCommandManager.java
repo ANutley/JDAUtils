@@ -1,7 +1,7 @@
 package me.anutley.jdautils.commands;
 
-import me.anutley.jdautils.commands.commands.text.TextCommand;
-import me.anutley.jdautils.commands.commands.text.annotations.JDATextCommand;
+import me.anutley.jdautils.commands.text.TextCommand;
+import me.anutley.jdautils.commands.text.annotations.JDATextCommand;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
@@ -177,7 +177,7 @@ public class TextCommandManager {
 
         for (TextCommand command : this.getCommands()) {
 
-            if (!args[0].equals(prefix + command.getCommand().name())) continue;
+            if (!args[0].equals(prefix + command.getAnnotation().name())) continue;
 
             return command;
         }

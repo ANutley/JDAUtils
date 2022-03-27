@@ -1,6 +1,6 @@
-package me.anutley.jdautils.commands.commands.application.slash;
+package me.anutley.jdautils.commands.application.slash;
 
-import me.anutley.jdautils.commands.commands.application.slash.annotations.SlashOption;
+import me.anutley.jdautils.commands.application.slash.annotations.SlashOption;
 
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
@@ -41,7 +41,7 @@ public class SlashCommandOption {
      * @return a list of options retrieved from the {@link SlashCommand}
      */
     public static List<SlashCommandOption> getOptions(SlashCommand slashCommand) {
-        return Arrays.stream(slashCommand.getCommandMethod().getParameters()).filter(parameter -> parameter.isAnnotationPresent(SlashOption.class))
+        return Arrays.stream(slashCommand.getMethod().getParameters()).filter(parameter -> parameter.isAnnotationPresent(SlashOption.class))
                 .map(parameter -> new SlashCommandOption(parameter.getAnnotation(SlashOption.class), parameter))
                 .collect(Collectors.toCollection(LinkedList::new));
     }

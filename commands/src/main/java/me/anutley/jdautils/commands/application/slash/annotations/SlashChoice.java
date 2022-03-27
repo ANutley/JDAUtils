@@ -1,4 +1,4 @@
-package me.anutley.jdautils.commands.commands.application.slash.annotations;
+package me.anutley.jdautils.commands.application.slash.annotations;
 
 public @interface SlashChoice {
 
