@@ -8,6 +8,7 @@ import me.anutley.jdautils.commands.utils.ReflectionsUtil;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.sharding.ShardManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +18,9 @@ import java.util.function.Predicate;
 
 public class CommandManager {
 
-    private final JDA jda;
+    private JDA jda;
+    private ShardManager shardManager;
+
     private final List<Class<?>> commandClasses;
     private final Predicate<CommandEvent<?, ?>> permissionPredicate;
     private final Consumer<CommandEvent<?, ?>> noPermissionConsumer;
@@ -48,11 +51,40 @@ public class CommandManager {
         this.contextCommandManager = contextCommandManager.build(this);
     }
 
+    public CommandManager(ShardManager shardManager,
+                          List<Class<?>> commandClasses,
+                          Predicate<CommandEvent<?, ?>> permissionPredicate,
+                          Consumer<CommandEvent<?, ?>> noPermissionConsumer,
+                          Consumer<CommandEvent<?, ?>> notInGuildConsumer,
+                          TextCommandManager.Builder textCommandManager,
+                          SlashCommandManager.Builder slashCommandManager,
+                          ContextCommandManager.Builder contextCommandManager
+
+    ) {
+        this.shardManager = shardManager;
+        this.commandClasses = commandClasses;
+        this.permissionPredicate = permissionPredicate;
+        this.noPermissionConsumer = noPermissionConsumer;
+        this.notInGuildConsumer = notInGuildConsumer;
+        this.textCommandManager = textCommandManager.build(this);
+        this.slashCommandManager = slashCommandManager.build(this);
+        this.contextCommandManager = contextCommandManager.build(this);
+    }
+
     /**
+     * This <em>WILL</em> return null if the builder was built using a {@link ShardManager} instance instead
      * @return The JDA instance
      */
     public JDA getJda() {
         return jda;
+    }
+
+    /**
+     * This <em>WILL</em> return null if the builder was built using a {@link JDA} instance instead
+     * @return The Shard Manager instance
+     */
+    public ShardManager getShardManager() {
+        return shardManager;
     }
 
     /**
@@ -132,13 +164,17 @@ public class CommandManager {
         globalCommands.forEach(applicationCommandData -> data.add(applicationCommandData.getCommandData()));
 
         if (!data.isEmpty()) {
-            getJda().updateCommands().addCommands(data).queue();
+            if (getJda() == null) {
+                getShardManager().getShards().forEach(jda ->
+                        jda.updateCommands().addCommands(data).queue()
+                );
+            } else getJda().updateCommands().addCommands(data).queue();
         }
 
 
         for (Map.Entry<String, List<CommandData>> entry : ApplicationCommandData.sortByGuildId(guildCommands).entrySet()) {
 
-            Guild guild = getJda().getGuildById(entry.getKey());
+            Guild guild = getJda() == null ? getShardManager().getGuildById(entry.getKey()) : getJda().getGuildById(entry.getKey());
             if (guild == null) continue;
 
             guild.updateCommands().addCommands(entry.getValue()).queue();
@@ -263,6 +299,37 @@ public class CommandManager {
             );
 
             jda.addEventListener(new CommandListener(commandManager)); // Add the command listener
+
+            return commandManager;
+        }
+
+        /**
+         * @param shardManager The Shard Manager instance which should be used to register event listeners
+         * @return The built command manager instance
+         */
+        public CommandManager build(ShardManager shardManager) {
+            List<Class<?>> classes = new ArrayList<>(commandClasses);
+
+            for (String path : searchPaths) {
+                classes.addAll(ReflectionsUtil.getClassesWithAnnotationsByPackage(path, Command.class));
+            }
+
+            if (!shardManager.getStatuses().values().stream().allMatch(status -> status.equals(JDA.Status.CONNECTED))) {
+                throw new IllegalStateException("Your Shard Manager instance needs to be ready before passing it to the CommandBuilder!");
+            }
+
+            CommandManager commandManager = new CommandManager(
+                    shardManager,
+                    classes,
+                    permissionPredicate,
+                    noPermissionConsumer,
+                    notInGuildConsumer,
+                    textCommandManager,
+                    slashCommandManager,
+                    contextCommandManager
+            );
+
+            shardManager.addEventListener(new CommandListener(commandManager)); // Add the command listener
 
             return commandManager;
         }
