@@ -4,6 +4,7 @@ import me.anutley.jdautils.commands.annotations.GuildOnly;
 import me.anutley.jdautils.commands.application.context.MessageContextCommand;
 import me.anutley.jdautils.commands.application.context.UserContextCommand;
 import me.anutley.jdautils.commands.application.slash.SlashCommand;
+import me.anutley.jdautils.commands.events.*;
 import me.anutley.jdautils.commands.text.TextCommand;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -22,29 +23,17 @@ public class CommandListener extends ListenerAdapter {
 
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-
         TextCommand command = manager.getTextCommandManager().getCommandFromEvent(event);
+        TextCommandEvent textCommandEvent = new TextCommandEvent(event, command);
 
         if (command == null) {
-            if (manager.getTextCommandManager().getNoCommandFoundConsumser() != null) {
-                manager.getTextCommandManager().getNoCommandFoundConsumser().accept(event);
+            if (manager.getTextCommandManager().getNoCommandFoundConsumer() != null) {
+                manager.getTextCommandManager().getNoCommandFoundConsumer().accept(event);
             }
             return;
         }
 
-        if (manager.getTextCommandManager().getPermissionPredicate() != null)
-            if (!manager.getTextCommandManager().getPermissionPredicate().test(event)) {
-                if (manager.getTextCommandManager().getNoPermissionConsumer() != null)
-                    manager.getTextCommandManager().getNoPermissionConsumer().accept(event);
-                return;
-            }
-
-        if (command.getMethod().isAnnotationPresent(GuildOnly.class) && !event.isFromGuild()) {
-            if (manager.getTextCommandManager().getNotInGuildConsumer() != null)
-                manager.getTextCommandManager().getNotInGuildConsumer().accept(event);
-            return;
-        }
-
+        if (!check(textCommandEvent)) return;
 
         command.execute(event);
     }
@@ -52,21 +41,10 @@ public class CommandListener extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         SlashCommand slashCommand = manager.getSlashCommandManager().getCommandFromEvent(event);
+        SlashCommandEvent slashCommandEvent = new SlashCommandEvent(event, slashCommand);
 
         if (slashCommand == null) return;
-
-        if (manager.getSlashCommandManager().getPermissionPredicate() != null)
-            if (!manager.getSlashCommandManager().getPermissionPredicate().test(event)) {
-                if (manager.getSlashCommandManager().getNoPermissionConsumer() != null)
-                    manager.getSlashCommandManager().getNoPermissionConsumer().accept(event);
-                return;
-            }
-
-        if (slashCommand.getMethod().isAnnotationPresent(GuildOnly.class) && !event.isFromGuild()) {
-            if (manager.getSlashCommandManager().getNotInGuildConsumer() != null)
-                manager.getSlashCommandManager().getNotInGuildConsumer().accept(event);
-            return;
-        }
+        if (!check(slashCommandEvent)) return;
 
         slashCommand.execute(event);
     }
@@ -74,21 +52,11 @@ public class CommandListener extends ListenerAdapter {
     @Override
     public void onUserContextInteraction(@NotNull UserContextInteractionEvent event) {
         UserContextCommand command = this.manager.getContextCommandManager().getUserCommandFromEvent(event);
+        UserContextCommandEvent contextEvent = new UserContextCommandEvent(event, command);
 
         if (command == null) return;
+        if (!check(contextEvent)) return;
 
-        if (manager.getContextCommandManager().getPermissionPredicate() != null)
-            if (!manager.getContextCommandManager().getPermissionPredicate().test(event)) {
-                if (manager.getContextCommandManager().getNoPermissionConsumer() != null)
-                    manager.getContextCommandManager().getNoPermissionConsumer().accept(event);
-                return;
-            }
-
-        if (command.getMethod().isAnnotationPresent(GuildOnly.class) && !event.isFromGuild()) {
-            if (manager.getContextCommandManager().getNotInGuildConsumer() != null)
-                manager.getContextCommandManager().getNotInGuildConsumer().accept(event);
-            return;
-        }
 
         command.execute(event);
     }
@@ -96,23 +64,30 @@ public class CommandListener extends ListenerAdapter {
     @Override
     public void onMessageContextInteraction(@NotNull MessageContextInteractionEvent event) {
         MessageContextCommand command = this.manager.getContextCommandManager().getMessageCommandFromEvent(event);
+        MessageContextCommandEvent contextEvent = new MessageContextCommandEvent(event, command);
 
         if (command == null) return;
-
-        if (manager.getContextCommandManager().getPermissionPredicate() != null)
-            if (!manager.getContextCommandManager().getPermissionPredicate().test(event)) {
-                if (manager.getContextCommandManager().getNoPermissionConsumer() != null)
-                    manager.getContextCommandManager().getNoPermissionConsumer().accept(event);
-                return;
-            }
-
-        if (command.getMethod().isAnnotationPresent(GuildOnly.class) && !event.isFromGuild()) {
-            if (manager.getContextCommandManager().getNotInGuildConsumer() != null)
-                manager.getContextCommandManager().getNotInGuildConsumer().accept(event);
-            return;
-        }
-
+        if (!check(contextEvent)) return;
 
         command.execute(event);
     }
+
+
+    private boolean check(CommandEvent<?, ?> event) {
+        if (manager.getPermissionPredicate() != null)
+            if (!manager.getPermissionPredicate().test(event)) {
+                if (manager.getNoPermissionConsumer() != null)
+                    manager.getNoPermissionConsumer().accept(event);
+                return false;
+            }
+
+        if (event.getCommand().getMethod().isAnnotationPresent(GuildOnly.class) && !event.isFromGuild()) {
+            if (manager.getNotInGuildConsumer() != null)
+                manager.getNotInGuildConsumer().accept(event);
+            return false;
+        }
+
+        return true;
+    }
+
 }

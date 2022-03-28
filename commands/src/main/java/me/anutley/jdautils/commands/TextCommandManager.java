@@ -11,46 +11,55 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 public class TextCommandManager {
 
-    private String prefix = "!"; // Default prefix
-    private final Map<String, String> guildPrefix = new HashMap<>();
-    private final List<TextCommand> commands = new ArrayList<>();
-    private Consumer<MessageReceivedEvent> noCommandFoundConsumser;
-    private Consumer<MessageReceivedEvent> notInGuildConsumer;
-    private Predicate<MessageReceivedEvent> permissionPredicate;
-    private Consumer<MessageReceivedEvent> noPermissionConsumer;
+    private final CommandManager commandManager;
+    private final List<TextCommand> commands;
+    private final String defaultPrefix;
+    private final Map<String, String> guildPrefixes;
+    private final Consumer<MessageReceivedEvent> noCommandFoundConsumer;
 
-    /**
-     * @param commandManager An instance of the command manager, used to retrieve things such as the commands package
-     */
-    public TextCommandManager(CommandManager commandManager) {
-
-        for (Class<?> clazz : commandManager.getCommandClasses()) {
-            for (Method method : clazz.getMethods()) {
-                if (method.isAnnotationPresent(JDATextCommand.class)) {
-                    commands.add(new TextCommand(method.getAnnotation(JDATextCommand.class), method));
-                }
-            }
-        }
+    public TextCommandManager(
+            CommandManager commandManager,
+            List<TextCommand> commands,
+            String defaultPrefix,
+            Map<String, String> guildPrefixes,
+            Consumer<MessageReceivedEvent> noCommandFoundConsumer
+    ) {
+        this.commandManager = commandManager;
+        this.commands = commands;
+        this.defaultPrefix = defaultPrefix;
+        this.guildPrefixes = guildPrefixes;
+        this.noCommandFoundConsumer = noCommandFoundConsumer;
     }
 
     /**
-     * @return the prefix that is used for text-based commands
+     * @return The base command manager
      */
-    public String getPrefix() {
-        return prefix;
+    public CommandManager getCommandManager() {
+        return commandManager;
     }
 
     /**
-     * @param prefix The prefix that should be set for text-based commands
-     * @return itself for chaining convenience
+     * @return A list of all {@link TextCommand}s that have been registered
      */
-    public TextCommandManager setPrefix(String prefix) {
-        this.prefix = prefix;
-        return this;
+    public List<TextCommand> getCommands() {
+        return commands;
+    }
+
+    /**
+     * @return The default prefix
+     */
+    public String getDefaultPrefix() {
+        return defaultPrefix;
+    }
+
+    /**
+     * @return A hashmap containing the guild-specific prefixes
+     */
+    public Map<String, String> getGuildPrefixes() {
+        return guildPrefixes;
     }
 
     /**
@@ -58,7 +67,7 @@ public class TextCommandManager {
      * @return the guild's prefix
      */
     public String getGuildsPrefix(String guildId) {
-        return guildPrefix.get(guildId);
+        return guildPrefixes.get(guildId);
     }
 
     /**
@@ -70,98 +79,11 @@ public class TextCommandManager {
     }
 
     /**
-     * @param guildId the id of the guild to set the prefix in
-     * @param prefix  the new prefix the guild should have
-     * @return itself for chaining convenience
+     * @return The consumer which will be accepted when no command is found
      */
-    public TextCommandManager setGuildPrefix(String guildId, String prefix) {
-        if (guildPrefix.get(guildId) != null) guildPrefix.replace(guildId, prefix);
-        else guildPrefix.put(guildId, prefix);
-        return this;
+    public Consumer<MessageReceivedEvent> getNoCommandFoundConsumer() {
+        return noCommandFoundConsumer;
     }
-
-    /**
-     * @param guild  the guild to set the prefix in
-     * @param prefix the new prefix the guild should have
-     * @return itself for chaining convenience
-     */
-    public TextCommandManager setGuildPrefix(Guild guild, String prefix) {
-        setGuildPrefix(guild.getId(), prefix);
-        return this;
-    }
-
-    /**
-     * @return a list of all the registered text-based commands
-     */
-    public List<TextCommand> getCommands() {
-        return commands;
-    }
-
-
-    /**
-     * @return The consumer which will be accepted if no command is found
-     */
-    public Consumer<MessageReceivedEvent> getNoCommandFoundConsumser() {
-        return noCommandFoundConsumser;
-    }
-
-    /**
-     * @param consumer The consumer which should be accepted if no command is found
-     * @return itself for chaining convenience
-     */
-    public TextCommandManager setNoCommandFoundConsumer(Consumer<MessageReceivedEvent> consumer) {
-        this.noCommandFoundConsumser = consumer;
-        return this;
-    }
-
-    /**
-     * @return The consumer which will be accepted if a command is guild-only, and the command is not ran in a Guild
-     */
-    public Consumer<MessageReceivedEvent> getNotInGuildConsumer() {
-        return notInGuildConsumer;
-    }
-
-    /**
-     * @param notInGuildConsumer The consumer which should be accepted if a command is guild-only, and the command is not ran in a Guild
-     * @return itself for chaining convenience
-     */
-    public TextCommandManager setNotInGuildConsumer(Consumer<MessageReceivedEvent> notInGuildConsumer) {
-        this.notInGuildConsumer = notInGuildConsumer;
-        return this;
-    }
-
-    /**
-     * @return The predicate which will be tested before a command is run
-     */
-    public Predicate<MessageReceivedEvent> getPermissionPredicate() {
-        return permissionPredicate;
-    }
-
-    /**
-     * @param permissionPredicate The predicate which should be tested before a command is run
-     * @return itself for chaining convenience
-     */
-    public TextCommandManager setPermissionPredicate(Predicate<MessageReceivedEvent> permissionPredicate) {
-        this.permissionPredicate = permissionPredicate;
-        return this;
-    }
-
-    /**
-     * @return The predicate which will be tested before a command is run
-     */
-    public Consumer<MessageReceivedEvent> getNoPermissionConsumer() {
-        return noPermissionConsumer;
-    }
-
-    /**
-     * @param noPermissionConsumer The predicate which should be tested before a command is run
-     * @return itself for chaining convenience
-     */
-    public TextCommandManager setNoPermissionConsumer(Consumer<MessageReceivedEvent> noPermissionConsumer) {
-        this.noPermissionConsumer = noPermissionConsumer;
-        return this;
-    }
-
 
     /**
      * @return the text-command which has been found
@@ -169,7 +91,7 @@ public class TextCommandManager {
     public TextCommand getCommandFromEvent(MessageReceivedEvent event) {
 
         String[] args = event.getMessage().getContentRaw().split(" ");
-        String prefix = this.getPrefix();
+        String prefix = this.getDefaultPrefix();
         if (event.isFromGuild()) {
             if (this.getGuildsPrefix(event.getGuild()) != null)
                 prefix = this.getGuildsPrefix(event.getGuild());
@@ -183,4 +105,71 @@ public class TextCommandManager {
         }
         return null;
     }
+
+
+    public static class Builder {
+
+        private String defaultPrefix = "!";
+        private Map<String, String> guildPrefixes = new HashMap<>();
+        private Consumer<MessageReceivedEvent> noCommandFoundConsumer;
+
+
+        public Builder setDefaultPrefix(String defaultPrefix) {
+            this.defaultPrefix = defaultPrefix;
+            return this;
+        }
+
+        /**
+         * @param guildId the id of the guild to set the prefix in
+         * @param prefix  the new prefix the guild should have
+         * @return itself for chaining convenience
+         */
+        public Builder setGuildPrefix(String guildId, String prefix) {
+            if (guildPrefixes.get(guildId) != null) guildPrefixes.replace(guildId, prefix);
+            else guildPrefixes.put(guildId, prefix);
+            return this;
+        }
+
+        /**
+         * @param guild  the guild to set the prefix in
+         * @param prefix the new prefix the guild should have
+         * @return itself for chaining convenience
+         */
+        public Builder setGuildPrefix(Guild guild, String prefix) {
+            setGuildPrefix(guild.getId(), prefix);
+            return this;
+        }
+
+        public Builder setGuildPrefixes(Map<String, String> guildPrefixes) {
+            this.guildPrefixes = guildPrefixes;
+            return this;
+        }
+
+        public Builder setNoCommandFoundConsumer(Consumer<MessageReceivedEvent> noCommandFoundConsumer) {
+            this.noCommandFoundConsumer = noCommandFoundConsumer;
+            return this;
+        }
+
+        public TextCommandManager build(CommandManager commandManager) {
+            List<TextCommand> commands = new ArrayList<>();
+
+            for (Class<?> clazz : commandManager.getCommandClasses()) {
+                for (Method method : clazz.getMethods()) {
+                    if (method.isAnnotationPresent(JDATextCommand.class)) {
+                        commands.add(new TextCommand(method.getAnnotation(JDATextCommand.class), method));
+                    }
+                }
+            }
+
+            return new TextCommandManager(
+                    commandManager,
+                    commands,
+                    defaultPrefix,
+                    guildPrefixes,
+                    noCommandFoundConsumer
+            );
+        }
+    }
+
+
 }

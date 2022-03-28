@@ -24,7 +24,9 @@ public class MenuBot {
 
         jda.awaitReady();
 
-        CommandManager commandManager = new CommandManager(jda, "me.anutley.jdautils.examples.menus");// The package the commands are in
+        CommandManager commandManager = new CommandManager.Builder()
+                .addSearchPath("me.anutley.jdautils.examples.menus") // The package the commands are in
+                .build(jda);
 
         commandManager.registerInteractions(); // This must be done to register all the interactions
 

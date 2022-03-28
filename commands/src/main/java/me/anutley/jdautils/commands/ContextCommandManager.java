@@ -1,12 +1,11 @@
 package me.anutley.jdautils.commands;
 
+import me.anutley.jdautils.commands.application.ApplicationCommandData;
 import me.anutley.jdautils.commands.application.annotations.GuildCommand;
 import me.anutley.jdautils.commands.application.context.MessageContextCommand;
 import me.anutley.jdautils.commands.application.context.UserContextCommand;
 import me.anutley.jdautils.commands.application.context.annotations.JDAMessageContextCommand;
 import me.anutley.jdautils.commands.application.context.annotations.JDAUserContextCommand;
-import me.anutley.jdautils.commands.application.slash.SlashCommandData;
-import net.dv8tion.jda.api.events.interaction.command.GenericContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -15,86 +14,49 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 public class ContextCommandManager {
 
-    private final List<MessageContextCommand> messageContextCommands = new ArrayList<>();
-    private final List<UserContextCommand> userContextCommands = new ArrayList<>();
-    private Consumer<GenericContextInteractionEvent<?>> notInGuildConsumer;
-    private Predicate<GenericContextInteractionEvent<?>> permissionPredicate;
-    private Consumer<GenericContextInteractionEvent<?>> noPermissionConsumer;
+    private final CommandManager commandManager;
+    private final List<MessageContextCommand> messageContextCommands;
+    private final List<UserContextCommand> userContextCommands;
 
-    /**
-     * @param commandManager An instance of the command manager, used to retrieve things such as the commands package
-     */
-    public ContextCommandManager(CommandManager commandManager) {
-
-        for (Class<?> clazz : commandManager.getCommandClasses()) {
-            for (Method method : clazz.getMethods()) {
-                if (method.isAnnotationPresent(JDAMessageContextCommand.class)) {
-                    messageContextCommands.add(new MessageContextCommand(method.getAnnotation(JDAMessageContextCommand.class), method));
-                } else if (method.isAnnotationPresent(JDAUserContextCommand.class)) {
-                    userContextCommands.add(new UserContextCommand(method.getAnnotation(JDAUserContextCommand.class), method));
-                }
-            }
-        }
+    public ContextCommandManager(
+            CommandManager commandManager,
+            List<MessageContextCommand> messageContextCommands,
+            List<UserContextCommand> userContextCommands
+    ) {
+        this.commandManager = commandManager;
+        this.messageContextCommands = messageContextCommands;
+        this.userContextCommands = userContextCommands;
     }
 
     /**
-     * @return The consumer which will be accepted if a command is guild-only, and the command is not ran in a Guild
+     * @return The base command manager
      */
-    public Consumer<GenericContextInteractionEvent<?>> getNotInGuildConsumer() {
-        return notInGuildConsumer;
+    public CommandManager getCommandManager() {
+        return commandManager;
     }
 
     /**
-     * @param notInGuildConsumer The consumer which should be accepted if a command is guild-only, and the command is not ran in a Guild
-     * @return itself for chaining convenience
+     * @return A list of the {@link MessageContextCommand}s have been registered
      */
-    public ContextCommandManager setNotInGuildConsumer(Consumer<GenericContextInteractionEvent<?>> notInGuildConsumer) {
-        this.notInGuildConsumer = notInGuildConsumer;
-        return this;
+    public List<MessageContextCommand> getMessageContextCommands() {
+        return messageContextCommands;
     }
 
     /**
-     * @return The predicate which will be tested before a command is run
+     * @return A list of the {@link UserContextCommand}s
      */
-    public Predicate<GenericContextInteractionEvent<?>> getPermissionPredicate() {
-        return permissionPredicate;
+    public List<UserContextCommand> getUserContextCommands() {
+        return userContextCommands;
     }
 
     /**
-     * @param permissionPredicate The predicate which should be tested before a command is run
-     * @return itself for chaining convenience
+     * @return Returns a list of {@link ApplicationCommandData} which contains all the command data
      */
-    public ContextCommandManager setPermissionPredicate(Predicate<GenericContextInteractionEvent<?>> permissionPredicate) {
-        this.permissionPredicate = permissionPredicate;
-        return this;
-    }
-
-    /**
-     * @return The predicate which will be tested before a command is run
-     */
-    public Consumer<GenericContextInteractionEvent<?>> getNoPermissionConsumer() {
-        return noPermissionConsumer;
-    }
-
-    /**
-     * @param noPermissionConsumer The predicate which should be tested before a command is run
-     * @return itself for chaining convenience
-     */
-    public ContextCommandManager setNoPermissionConsumer(Consumer<GenericContextInteractionEvent<?>> noPermissionConsumer) {
-        this.noPermissionConsumer = noPermissionConsumer;
-        return this;
-    }
-
-    /**
-     * @return Returns a list of {@link SlashCommandData} which contains all the command data
-     */
-    public List<SlashCommandData> getCommandData() {
-        List<SlashCommandData> commandData = new ArrayList<>();
+    public List<ApplicationCommandData> getCommandData() {
+        List<ApplicationCommandData> commandData = new ArrayList<>();
 
         for (MessageContextCommand messageContextCommand : messageContextCommands) {
 
@@ -105,8 +67,8 @@ public class ContextCommandManager {
 
             CommandData data = Commands.message(messageContextCommand.getAnnotation().name());
 
-            if (guildId == null) commandData.add(new SlashCommandData(guildId, data));
-            else commandData.add(new SlashCommandData(guildId, data));
+            if (guildId == null) commandData.add(new ApplicationCommandData(guildId, data));
+            else commandData.add(new ApplicationCommandData(guildId, data));
         }
 
         for (UserContextCommand userContextCommand : userContextCommands) {
@@ -118,13 +80,12 @@ public class ContextCommandManager {
 
             CommandData data = Commands.user(userContextCommand.getAnnotation().name());
 
-            if (guildId == null) commandData.add(new SlashCommandData(guildId, data));
-            else commandData.add(new SlashCommandData(guildId, data));
+            if (guildId == null) commandData.add(new ApplicationCommandData(guildId, data));
+            else commandData.add(new ApplicationCommandData(guildId, data));
         }
 
         return commandData;
     }
-
 
     /**
      * @param event used to get the command name, which then searches through the list of {@link MessageContextCommand}s and finds the correct command
@@ -145,4 +106,34 @@ public class ContextCommandManager {
                 .findFirst()
                 .orElse(null);
     }
+
+    public static class Builder {
+
+        /**
+         * @param commandManager The base command manager
+         * @return The built command manager
+         */
+        public ContextCommandManager build(CommandManager commandManager) {
+
+            List<MessageContextCommand> messageContextCommands = new ArrayList<>();
+            List<UserContextCommand> userContextCommands = new ArrayList<>();
+
+            for (Class<?> clazz : commandManager.getCommandClasses()) {
+                for (Method method : clazz.getMethods()) {
+                    if (method.isAnnotationPresent(JDAMessageContextCommand.class)) {
+                        messageContextCommands.add(new MessageContextCommand(method.getAnnotation(JDAMessageContextCommand.class), method));
+                    } else if (method.isAnnotationPresent(JDAUserContextCommand.class)) {
+                        userContextCommands.add(new UserContextCommand(method.getAnnotation(JDAUserContextCommand.class), method));
+                    }
+                }
+            }
+
+            return new ContextCommandManager(
+                    commandManager,
+                    messageContextCommands,
+                    userContextCommands
+            );
+        }
+    }
+
 }

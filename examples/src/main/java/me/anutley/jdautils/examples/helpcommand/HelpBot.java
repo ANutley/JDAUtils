@@ -22,9 +22,11 @@ public class HelpBot {
 
         jda.awaitReady();
 
-        commandManager = new CommandManager(jda, "me.anutley.jdautils.examples.helpcommand") // The package the commands are in
+        commandManager = new CommandManager.Builder()
+                .addSearchPath("me.anutley.jdautils.examples.helpcommand") // The package the commands are in
                 .textCommandManager(textCommandManager ->
-                        textCommandManager.setPrefix("!!"));
+                        textCommandManager.setDefaultPrefix("!!"))
+                .build(jda);
 
     }
 

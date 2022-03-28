@@ -2,7 +2,7 @@ package me.anutley.jdautils.commands;
 
 import me.anutley.jdautils.commands.application.annotations.GuildCommand;
 import me.anutley.jdautils.commands.application.slash.SlashCommand;
-import me.anutley.jdautils.commands.application.slash.SlashCommandData;
+import me.anutley.jdautils.commands.application.ApplicationCommandData;
 import me.anutley.jdautils.commands.application.slash.SlashCommandOption;
 import me.anutley.jdautils.commands.application.slash.annotations.JDASlashCommand;
 import net.dv8tion.jda.api.entities.ChannelType;
@@ -23,80 +23,35 @@ import java.util.stream.Collectors;
 public class SlashCommandManager {
 
     private final CommandManager commandManager;
-    private final List<SlashCommand> commands = new ArrayList<>();
-    private Consumer<SlashCommandInteractionEvent> notInGuildConsumer;
-    private Predicate<SlashCommandInteractionEvent> permissionPredicate;
-    private Consumer<SlashCommandInteractionEvent> noPermissionConsumer;
+    private final List<SlashCommand> commands;
 
-    /**
-     * @param commandManager An instance of the command manager, used to retrieve things such as the commands package
-     */
-    public SlashCommandManager(CommandManager commandManager) {
+    public SlashCommandManager(
+            CommandManager commandManager,
+            List<SlashCommand> commands
+    ) {
         this.commandManager = commandManager;
-
-        for (Class<?> clazz : commandManager.getCommandClasses()) {
-            for (Method method : clazz.getMethods()) {
-                if (method.isAnnotationPresent(JDASlashCommand.class)) {
-                    commands.add(new SlashCommand(method.getAnnotation(JDASlashCommand.class), method));
-                }
-            }
-        }
+        this.commands = commands;
     }
 
     /**
-     * @return The consumer which will be accepted if a command is guild-only, and the command is not ran in a Guild
+     * @return The base command manager
      */
-    public Consumer<SlashCommandInteractionEvent> getNotInGuildConsumer() {
-        return notInGuildConsumer;
+    public CommandManager getCommandManager() {
+        return commandManager;
     }
 
     /**
-     * @param notInGuildConsumer The consumer which should be accepted if a command is guild-only, and the command is not ran in a Guild
-     * @return itself for chaining convenience
+     * @return A list of all the {@link SlashCommand}s that have been registered
      */
-    public SlashCommandManager setNotInGuildConsumer(Consumer<SlashCommandInteractionEvent> notInGuildConsumer) {
-        this.notInGuildConsumer = notInGuildConsumer;
-        return this;
+    public List<SlashCommand> getCommands() {
+        return commands;
     }
 
     /**
-     * @return The predicate which will be tested before a command is run
+     * @return Returns a list of {@link ApplicationCommandData} which contains all the command data
      */
-    public Predicate<SlashCommandInteractionEvent> getPermissionPredicate() {
-        return permissionPredicate;
-    }
-
-    /**
-     * @param permissionPredicate The predicate which should be tested before a command is run
-     * @return itself for chaining convenience
-     */
-    public SlashCommandManager setPermissionPredicate(Predicate<SlashCommandInteractionEvent> permissionPredicate) {
-        this.permissionPredicate = permissionPredicate;
-        return this;
-    }
-
-    /**
-     * @return The predicate which will be tested before a command is run
-     */
-    public Consumer<SlashCommandInteractionEvent> getNoPermissionConsumer() {
-        return noPermissionConsumer;
-    }
-
-    /**
-     * @param noPermissionConsumer The predicate which should be tested before a command is run
-     * @return itself for chaining convenience
-     */
-    public SlashCommandManager setNoPermissionConsumer(Consumer<SlashCommandInteractionEvent> noPermissionConsumer) {
-        this.noPermissionConsumer = noPermissionConsumer;
-        return this;
-    }
-
-
-    /**
-     * @return Returns a list of {@link me.anutley.jdautils.commands.application.slash.SlashCommandData} which contains all the command data
-     */
-    public List<me.anutley.jdautils.commands.application.slash.SlashCommandData> getCommandData() {
-        List<me.anutley.jdautils.commands.application.slash.SlashCommandData> commandData = new ArrayList<>();
+    public List<ApplicationCommandData> getCommandData() {
+        List<ApplicationCommandData> commandData = new ArrayList<>();
 
         for (String base : SlashCommand.getAllBaseCommands(commands)) {
 
@@ -172,8 +127,8 @@ public class SlashCommandManager {
             }
 
             if (guildId == null)
-                commandData.add(new me.anutley.jdautils.commands.application.slash.SlashCommandData(guildId, data));
-            else commandData.add(new SlashCommandData(guildId, data));
+                commandData.add(new ApplicationCommandData(guildId, data));
+            else commandData.add(new ApplicationCommandData(guildId, data));
 
         }
 
@@ -190,4 +145,30 @@ public class SlashCommandManager {
                 .findFirst()
                 .orElse(null);
     }
+
+
+    public static class Builder {
+
+        /**
+         * @param commandManager The base command manager
+         * @return The built command manager
+         */
+        public SlashCommandManager build(CommandManager commandManager) {
+            List<SlashCommand> commands = new ArrayList<>();
+
+            for (Class<?> clazz : commandManager.getCommandClasses()) {
+                for (Method method : clazz.getMethods()) {
+                    if (method.isAnnotationPresent(JDASlashCommand.class)) {
+                        commands.add(new SlashCommand(method.getAnnotation(JDASlashCommand.class), method));
+                    }
+                }
+            }
+
+            return new SlashCommandManager(
+                    commandManager,
+                    commands
+            );
+        }
+    }
+
 }

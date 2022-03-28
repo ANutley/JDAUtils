@@ -20,11 +20,13 @@ public class PingPongBot {
 
         jda.awaitReady();
 
-        CommandManager commandManager = new CommandManager(jda, "me.anutley.jdautils.examples.pingpong") // The package the commands are in
+        new CommandManager.Builder()
+                .addSearchPath("me.anutley.jdautils.examples.pingpong") // The package the commands are in
                 .textCommandManager(textCommandManager -> { // Allows you to modify the text-command related settings
-                            textCommandManager.setPrefix("!"); // Sets the global prefix for the bot
+                            textCommandManager.setDefaultPrefix("!"); // Sets the global prefix for the bot
                             textCommandManager.setGuildPrefix("833042350850441216", "??"); // This is volatile, it needs to be reset after every restart
                         }
-                );
+                )
+                .build(jda);
     }
 }
