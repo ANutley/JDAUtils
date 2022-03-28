@@ -16,6 +16,26 @@ public class UserContextCommand extends Command<JDAUserContextCommand, UserConte
     }
 
     @Override
+    public String getName() {
+        return getAnnotation().name();
+    }
+
+    @Override
+    public String getDescription() {
+        return getAnnotation().description();
+    }
+
+    @Override
+    public String getCategory() {
+        return getAnnotation().category();
+    }
+
+    @Override
+    public String getUsage() {
+        return getAnnotation().usage();
+    }
+
+    @Override
     public HashMap<String, String> getMetaTags() {
         HashMap<String, String> metaTags = new HashMap<>();
 

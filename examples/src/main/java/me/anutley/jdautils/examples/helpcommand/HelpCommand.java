@@ -16,9 +16,9 @@ public class HelpCommand {
                 .setTitle("Help Commands!")
                 .setColor(0x008aff);
 
-        for (TextCommand textCommand : HelpBot.getCommandManager().getTextCommandManager().getCommands()) {
-            String description = "`Description:` " + textCommand.getAnnotation().description() + "\n`Category:` " + textCommand.getAnnotation().category();
-            builder.addField(textCommand.getAnnotation().name(), description, false);
+        for (me.anutley.jdautils.commands.Command<?, ?> command : HelpBot.getCommandManager().getCommands()) {
+            String description = "`Description:` " + command.getDescription() + "\n`Category:` " + command.getCategory();
+            builder.addField(command.getName(), description, false);
         }
 
         event.getDiscordEvent().getMessage().replyEmbeds(builder.build()).queue();

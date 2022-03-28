@@ -43,6 +43,26 @@ public abstract class Command<A extends Annotation, E extends GenericEvent> {
     }
 
     /**
+     * @return The name of the command
+     */
+    public abstract String getName();
+
+    /**
+     * @return The description of the command
+     */
+    public abstract String getDescription();
+
+    /**
+     * @return The category of the command
+     */
+    public abstract String getCategory();
+
+    /**
+     * @return The usage of the command
+     */
+    public abstract String getUsage();
+
+    /**
      * @return A hashmap containing the {@link CommandMeta} information
      */
     public abstract HashMap<String, String> getMetaTags();

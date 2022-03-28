@@ -136,6 +136,14 @@ public class CommandManager {
         return contextCommandManager;
     }
 
+    public List<me.anutley.jdautils.commands.Command<?, ?>> getCommands() {
+        return new ArrayList<me.anutley.jdautils.commands.Command<?, ?>>() {{
+            addAll(getTextCommandManager().getCommands());
+            addAll(getSlashCommandManager().getCommands());
+            addAll(getContextCommandManager().getUserContextCommands());
+            addAll(getContextCommandManager().getMessageContextCommands());
+        }};
+    }
     /**
      * Registers all the interactions that you have created
      *

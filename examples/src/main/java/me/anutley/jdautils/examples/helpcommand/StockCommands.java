@@ -12,7 +12,7 @@ public class StockCommands {
         event.getDiscordEvent().getMessage().reply("hello world!").queue();
     }
 
-    @JDATextCommand(name = "ping", description = "A simple ping command")
+    @JDATextCommand(name = "ping", description = "A simple ping command", category = "misc")
     public void pingCommand(TextCommandEvent event) {
         event.getDiscordEvent().getMessage().reply("pong!").queue();
     }
