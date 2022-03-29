@@ -1,11 +1,13 @@
 package me.anutley.jdautils.commands;
 
 import me.anutley.jdautils.commands.annotations.GuildOnly;
+import me.anutley.jdautils.commands.annotations.NSFW;
 import me.anutley.jdautils.commands.application.context.MessageContextCommand;
 import me.anutley.jdautils.commands.application.context.UserContextCommand;
 import me.anutley.jdautils.commands.application.slash.SlashCommand;
 import me.anutley.jdautils.commands.events.*;
 import me.anutley.jdautils.commands.text.TextCommand;
+import net.dv8tion.jda.api.entities.BaseGuildMessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
@@ -85,6 +87,16 @@ public class CommandListener extends ListenerAdapter {
             if (manager.getNotInGuildConsumer() != null)
                 manager.getNotInGuildConsumer().accept(event);
             return false;
+        }
+
+        if (event.getCommand().getMethod().isAnnotationPresent(NSFW.class)) {
+            if (event.getMessageChannel() instanceof BaseGuildMessageChannel) {
+                if (!((BaseGuildMessageChannel) event.getMessageChannel()).isNSFW())
+                    if (manager.getNotInNSFWChannelConsumer() != null) {
+                        manager.getNotInNSFWChannelConsumer().accept(event);
+                    }
+                return false;
+            }
         }
 
         return true;

@@ -22,9 +22,11 @@ public class CommandManager {
     private ShardManager shardManager;
 
     private final List<Class<?>> commandClasses;
+
     private final Predicate<CommandEvent<?, ?>> permissionPredicate;
     private final Consumer<CommandEvent<?, ?>> noPermissionConsumer;
     private final Consumer<CommandEvent<?, ?>> notInGuildConsumer;
+    private final Consumer<CommandEvent<?, ?>> notInNSFWChannelConsumer;
 
     private final TextCommandManager textCommandManager;
     private final SlashCommandManager slashCommandManager;
@@ -36,6 +38,7 @@ public class CommandManager {
                           Predicate<CommandEvent<?, ?>> permissionPredicate,
                           Consumer<CommandEvent<?, ?>> noPermissionConsumer,
                           Consumer<CommandEvent<?, ?>> notInGuildConsumer,
+                          Consumer<CommandEvent<?, ?>> notInNSFWChannelConsumer,
                           TextCommandManager.Builder textCommandManager,
                           SlashCommandManager.Builder slashCommandManager,
                           ContextCommandManager.Builder contextCommandManager
@@ -46,6 +49,7 @@ public class CommandManager {
         this.permissionPredicate = permissionPredicate;
         this.noPermissionConsumer = noPermissionConsumer;
         this.notInGuildConsumer = notInGuildConsumer;
+        this.notInNSFWChannelConsumer = notInNSFWChannelConsumer;
         this.textCommandManager = textCommandManager.build(this);
         this.slashCommandManager = slashCommandManager.build(this);
         this.contextCommandManager = contextCommandManager.build(this);
@@ -56,6 +60,7 @@ public class CommandManager {
                           Predicate<CommandEvent<?, ?>> permissionPredicate,
                           Consumer<CommandEvent<?, ?>> noPermissionConsumer,
                           Consumer<CommandEvent<?, ?>> notInGuildConsumer,
+                          Consumer<CommandEvent<?, ?>> notInNSFWChannelConsumer,
                           TextCommandManager.Builder textCommandManager,
                           SlashCommandManager.Builder slashCommandManager,
                           ContextCommandManager.Builder contextCommandManager
@@ -66,6 +71,7 @@ public class CommandManager {
         this.permissionPredicate = permissionPredicate;
         this.noPermissionConsumer = noPermissionConsumer;
         this.notInGuildConsumer = notInGuildConsumer;
+        this.notInNSFWChannelConsumer = notInNSFWChannelConsumer;
         this.textCommandManager = textCommandManager.build(this);
         this.slashCommandManager = slashCommandManager.build(this);
         this.contextCommandManager = contextCommandManager.build(this);
@@ -73,6 +79,7 @@ public class CommandManager {
 
     /**
      * This <em>WILL</em> return null if the builder was built using a {@link ShardManager} instance instead
+     *
      * @return The JDA instance
      */
     public JDA getJda() {
@@ -81,6 +88,7 @@ public class CommandManager {
 
     /**
      * This <em>WILL</em> return null if the builder was built using a {@link JDA} instance instead
+     *
      * @return The Shard Manager instance
      */
     public ShardManager getShardManager() {
@@ -116,6 +124,13 @@ public class CommandManager {
     }
 
     /**
+     * @return The consumer which will be accepted if the command ran is marked as NSFW, but the channel it was used in wasn't marked as NSFW
+     */
+    public Consumer<CommandEvent<?, ?>> getNotInNSFWChannelConsumer() {
+        return notInNSFWChannelConsumer;
+    }
+
+    /**
      * @return The text command manager
      */
     public TextCommandManager getTextCommandManager() {
@@ -144,6 +159,7 @@ public class CommandManager {
             addAll(getContextCommandManager().getMessageContextCommands());
         }};
     }
+
     /**
      * Registers all the interactions that you have created
      *
@@ -198,9 +214,11 @@ public class CommandManager {
 
         private final List<String> searchPaths = new ArrayList<>();
         private final List<Class<?>> commandClasses = new ArrayList<>();
+
         private Predicate<CommandEvent<?, ?>> permissionPredicate;
         private Consumer<CommandEvent<?, ?>> noPermissionConsumer;
         private Consumer<CommandEvent<?, ?>> notInGuildConsumer;
+        private Consumer<CommandEvent<?, ?>> notInNSFWChannelConsumer;
 
         private final TextCommandManager.Builder textCommandManager = new TextCommandManager.Builder();
         private final SlashCommandManager.Builder slashCommandManager = new SlashCommandManager.Builder();
@@ -210,6 +228,7 @@ public class CommandManager {
         /**
          * JDAUtils uses reflections to search for classes, instead of adding classes manually (which can be done {@link Builder#addCommandClass(Class)})
          * you can specify a package name for JDAUtils to search in.
+         *
          * @param packageName The package name to search in for classes which contain commands
          * @return Itself for chaining convenience
          */
@@ -220,6 +239,7 @@ public class CommandManager {
 
         /**
          * Manually add a class for JDAUtils to search for commands in
+         *
          * @param commandClass The class to search in
          * @return Itself for chaining convenience
          */
@@ -247,11 +267,20 @@ public class CommandManager {
         }
 
         /**
-         * @param notInGuildConsumer  The consumer which will be accepted if the command is not ran in a guild, and it is {@link GuildOnly} command
+         * @param notInGuildConsumer The consumer which will be accepted if the command is not ran in a guild, and it is {@link GuildOnly} command
          * @return Itself for chaining convenience
          */
         public Builder setNotInGuildConsumer(Consumer<CommandEvent<?, ?>> notInGuildConsumer) {
             this.notInGuildConsumer = notInGuildConsumer;
+            return this;
+        }
+
+        /**
+         * @param notInNSFWChannelConsumer The consumer which will be accepted if the command ran is marked as NSFW, but the channel it was used in wasn't marked as NSFW
+         * @return Itself for chaining convenience
+         */
+        public Builder setNotInNSFWChannelConsumer(Consumer<CommandEvent<?, ?>> notInNSFWChannelConsumer) {
+            this.notInNSFWChannelConsumer = notInNSFWChannelConsumer;
             return this;
         }
 
@@ -304,6 +333,7 @@ public class CommandManager {
                     permissionPredicate,
                     noPermissionConsumer,
                     notInGuildConsumer,
+                    notInNSFWChannelConsumer,
                     textCommandManager,
                     slashCommandManager,
                     contextCommandManager
@@ -335,6 +365,7 @@ public class CommandManager {
                     permissionPredicate,
                     noPermissionConsumer,
                     notInGuildConsumer,
+                    notInNSFWChannelConsumer,
                     textCommandManager,
                     slashCommandManager,
                     contextCommandManager
