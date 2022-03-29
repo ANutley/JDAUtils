@@ -68,9 +68,10 @@ public class SlashCommandManager {
 
                 LinkedList<SlashCommandOption> options = new LinkedList<>(SlashCommandOption.getOptions(slashCommand));
 
+                List<OptionData> optionList = new ArrayList<>();
+
                 for (SlashCommandOption option : options) {
                     OptionData optionData = new OptionData(option.getOption().type(), option.getOption().name(), option.getOption().description(), option.getOption().required());
-
                     if (option.getOption().type().equals(OptionType.STRING) || option.getOption().type().equals(OptionType.INTEGER))
                         if (option.getOption().choices().length != 0)
                             optionData.addChoices(Arrays.stream(option.getOption().choices())
@@ -84,7 +85,7 @@ public class SlashCommandManager {
                                     .filter(channelType -> channelType != ChannelType.UNKNOWN)
                                     .collect(Collectors.toList()));
 
-                    optionDataList.add(optionData);
+                    optionList.add(optionData);
                 }
 
                 if (!slashCommand.getAnnotation().baseDescription().equals("No base command description"))
@@ -100,7 +101,7 @@ public class SlashCommandManager {
                 if (nameArgs.length == 2) {
                     if (subcommandDataMap.stream().anyMatch(subcommandData -> subcommandData.getName().equals(nameArgs[0] + "/" + nameArgs[1])))
                         continue;
-                    subcommandDataMap.add(new SubcommandData(nameArgs[1], slashCommand.getAnnotation().description()).addOptions(optionDataList));
+                    subcommandDataMap.add(new SubcommandData(nameArgs[1], slashCommand.getAnnotation().description()).addOptions(optionList));
                 }
 
                 if (nameArgs.length == 3) {
@@ -110,10 +111,11 @@ public class SlashCommandManager {
                     }
 
                     subcommandGroupDataList.stream().filter(groupData -> groupData.getName().equals(nameArgs[1]))
-                            .findFirst().ifPresent(subcommandGroupData -> subcommandGroupData.addSubcommands(new SubcommandData(nameArgs[2], slashCommand.getAnnotation().description()).addOptions(optionDataList)));
+                            .findFirst().ifPresent(subcommandGroupData -> subcommandGroupData.addSubcommands(new SubcommandData(nameArgs[2], slashCommand.getAnnotation().description()).addOptions(optionList)));
 
                 }
 
+                optionDataList.addAll(optionList);
             }
 
             CommandData data;
