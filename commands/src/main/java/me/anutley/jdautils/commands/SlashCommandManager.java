@@ -53,25 +53,30 @@ public class SlashCommandManager {
     public List<ApplicationCommandData> getCommandData() {
         List<ApplicationCommandData> commandData = new ArrayList<>();
 
-        for (String base : SlashCommand.getAllBaseCommands(commands)) {
+        for (String base : SlashCommand.getAllBaseCommands(commands)) { // Get all the BASE commands that are registered
 
             List<SubcommandGroupData> subcommandGroupDataList = new ArrayList<>();
-            List<SubcommandData> subcommandDataMap = new ArrayList<>();
+            List<SubcommandData> subcommandDataList = new ArrayList<>();
             LinkedList<OptionData> optionDataList = new LinkedList<>();
 
             String description = "No base command description";
             String guildId = null;
 
-            for (SlashCommand slashCommand : SlashCommand.getCommandsFromBase(commands, base)) {
+            for (SlashCommand slashCommand : SlashCommand.getCommandsFromBase(commands, base)) { // Get all the slash command that are registered with the specific base
                 if (slashCommand.getMethod().isAnnotationPresent(GuildCommand.class))
+                    // If it's a guild command, set the guild id, so we can register it guild-wide instead of globally
                     guildId = slashCommand.getMethod().getAnnotation(GuildCommand.class).value();
 
                 LinkedList<SlashCommandOption> options = new LinkedList<>(SlashCommandOption.getOptions(slashCommand));
 
+                // An arraylist of options just for this specific command, this is done to ensure only the data for this command is added
                 List<OptionData> optionList = new ArrayList<>();
 
-                for (SlashCommandOption option : options) {
+                for (SlashCommandOption option : options) { // Loop through all the options
+                    // Convert it to a JDA option data
                     OptionData optionData = new OptionData(option.getOption().type(), option.getOption().name(), option.getOption().description(), option.getOption().required());
+
+                    // Set the pre-defined choices if they exist
                     if (option.getOption().type().equals(OptionType.STRING) || option.getOption().type().equals(OptionType.INTEGER))
                         if (option.getOption().choices().length != 0)
                             optionData.addChoices(Arrays.stream(option.getOption().choices())
@@ -82,7 +87,7 @@ public class SlashCommandManager {
                     if (option.getOption().type().equals(OptionType.CHANNEL))
                         if (option.getOption().channelTypes().length != 0)
                             optionData.setChannelTypes(Arrays.stream(option.getOption().channelTypes())
-                                    .filter(channelType -> channelType != ChannelType.UNKNOWN)
+                                    .filter(channelType -> channelType != ChannelType.UNKNOWN) // Filter out the ones which are default
                                     .collect(Collectors.toList()));
 
                     optionList.add(optionData);
@@ -94,22 +99,24 @@ public class SlashCommandManager {
 
                 String[] nameArgs = slashCommand.getAnnotation().name().split("/");
 
-                if (nameArgs.length == 1) {
+                if (nameArgs.length == 1) { // It is just a single command
                     description = slashCommand.getAnnotation().description();
                 }
 
-                if (nameArgs.length == 2) {
-                    if (subcommandDataMap.stream().anyMatch(subcommandData -> subcommandData.getName().equals(nameArgs[0] + "/" + nameArgs[1])))
-                        continue;
-                    subcommandDataMap.add(new SubcommandData(nameArgs[1], slashCommand.getAnnotation().description()).addOptions(optionList));
+                if (nameArgs.length == 2) { // It is a base command and a sub command
+                    if (subcommandDataList.stream().anyMatch(subcommandData -> subcommandData.getName().equals(nameArgs[0] + "/" + nameArgs[1])))
+                        continue; // If this subcommand already exists skip it, else add it
+                    subcommandDataList.add(new SubcommandData(nameArgs[1], slashCommand.getAnnotation().description()).addOptions(optionList));
                 }
 
-                if (nameArgs.length == 3) {
+                if (nameArgs.length == 3) { // It is a base command, a sub command group and a sub command
 
+                    // If this subcommand group doesn't already exist, add it
                     if (subcommandGroupDataList.stream().noneMatch(subcommandGroupData -> subcommandGroupData.getName().equals(nameArgs[1]))) {
                         subcommandGroupDataList.add(new SubcommandGroupData(nameArgs[1], slashCommand.getAnnotation().description()));
                     }
 
+                    // Search through the group data, if it exists, add the subcommand data
                     subcommandGroupDataList.stream().filter(groupData -> groupData.getName().equals(nameArgs[1]))
                             .findFirst().ifPresent(subcommandGroupData -> subcommandGroupData.addSubcommands(new SubcommandData(nameArgs[2], slashCommand.getAnnotation().description()).addOptions(optionList)));
 
@@ -119,18 +126,16 @@ public class SlashCommandManager {
             }
 
             CommandData data;
-            if (subcommandDataMap.isEmpty() && subcommandGroupDataList.isEmpty()) {
+            if (subcommandDataList.isEmpty() && subcommandGroupDataList.isEmpty()) { // It is just a single command
                 data = (Commands.slash(base, description)
                         .addOptions(optionDataList));
             } else {
-                data = (Commands.slash(base, description)
+                data = (Commands.slash(base, description) // There are sub commands and/or sub command groups
                         .addSubcommandGroups(subcommandGroupDataList)
-                        .addSubcommands(subcommandDataMap));
+                        .addSubcommands(subcommandDataList));
             }
 
-            if (guildId == null)
-                commandData.add(new ApplicationCommandData(guildId, data));
-            else commandData.add(new ApplicationCommandData(guildId, data));
+            commandData.add(new ApplicationCommandData(guildId, data));
 
         }
 

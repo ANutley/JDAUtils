@@ -58,30 +58,23 @@ public class ContextCommandManager {
     public List<ApplicationCommandData> getCommandData() {
         List<ApplicationCommandData> commandData = new ArrayList<>();
 
-        for (MessageContextCommand messageContextCommand : messageContextCommands) {
+        List<Command<?, ?>> allContextCommands = new ArrayList<Command<?, ?>>() {{
+            addAll(userContextCommands);
+            addAll(messageContextCommands);
+        }};
+
+        for (Command<?, ?> command : allContextCommands) {
 
             String guildId = null;
 
-            if (messageContextCommand.getMethod().isAnnotationPresent(GuildCommand.class))
-                guildId = messageContextCommand.getMethod().getAnnotation(GuildCommand.class).value();
+            if (command.getMethod().isAnnotationPresent(GuildCommand.class))
+                guildId = command.getMethod().getAnnotation(GuildCommand.class).value();
 
-            CommandData data = Commands.message(messageContextCommand.getAnnotation().name());
+            CommandData data = null;
+            if (command instanceof MessageContextCommand) data = Commands.message(command.getName());
+            if (command instanceof UserContextCommand) data = Commands.user(command.getName());
 
-            if (guildId == null) commandData.add(new ApplicationCommandData(guildId, data));
-            else commandData.add(new ApplicationCommandData(guildId, data));
-        }
-
-        for (UserContextCommand userContextCommand : userContextCommands) {
-
-            String guildId = null;
-
-            if (userContextCommand.getMethod().isAnnotationPresent(GuildCommand.class))
-                guildId = userContextCommand.getMethod().getAnnotation(GuildCommand.class).value();
-
-            CommandData data = Commands.user(userContextCommand.getAnnotation().name());
-
-            if (guildId == null) commandData.add(new ApplicationCommandData(guildId, data));
-            else commandData.add(new ApplicationCommandData(guildId, data));
+            commandData.add(new ApplicationCommandData(guildId, data));
         }
 
         return commandData;

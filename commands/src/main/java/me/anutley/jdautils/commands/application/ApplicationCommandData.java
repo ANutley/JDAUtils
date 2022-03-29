@@ -7,6 +7,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * A class which holds both command data, and potentially a guild id.
+ * This helps to easily tie command data to a guild
+ */
 public class ApplicationCommandData {
 
     private final String guildId;

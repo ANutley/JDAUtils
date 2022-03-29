@@ -150,8 +150,8 @@ public class CommandManager {
      * @return itself for chaining convenience
      */
     public CommandManager registerInteractions() {
-        List<ApplicationCommandData> slashCommands = slashCommandManager.getCommandData();
-        List<ApplicationCommandData> contextCommands = contextCommandManager.getCommandData();
+        List<ApplicationCommandData> slashCommands = slashCommandManager.getCommandData(); // Get the slash command data
+        List<ApplicationCommandData> contextCommands = contextCommandManager.getCommandData(); // Get the context command data
 
         List<ApplicationCommandData> allCommands = new ArrayList<ApplicationCommandData>() {{
             addAll(slashCommands);
@@ -168,11 +168,12 @@ public class CommandManager {
         }
 
 
+        // Add all the global commands to an array list with the JDA command data
         List<CommandData> data = new ArrayList<>();
         globalCommands.forEach(applicationCommandData -> data.add(applicationCommandData.getCommandData()));
 
         if (!data.isEmpty()) {
-            if (getJda() == null) {
+            if (getJda() == null) { // The JDA instance is null, so they initialised the command manager with a shard manager
                 getShardManager().getShards().forEach(jda ->
                         jda.updateCommands().addCommands(data).queue()
                 );
@@ -180,8 +181,10 @@ public class CommandManager {
         }
 
 
+        // Group the commands by guild ids to add all the guild commands to each guild in one go
         for (Map.Entry<String, List<CommandData>> entry : ApplicationCommandData.sortByGuildId(guildCommands).entrySet()) {
 
+            // Get either the jda instance or the shard manager depending on what they initialised the command manager with.
             Guild guild = getJda() == null ? getShardManager().getGuildById(entry.getKey()) : getJda().getGuildById(entry.getKey());
             if (guild == null) continue;
 
