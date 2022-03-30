@@ -10,6 +10,6 @@ public class PingPongCommand {
     // Sets the name and description of the command and registers it
     @JDATextCommand(name = "ping", description = "Simple ping-pong command")
     public void pingPongTextCommand(TextCommandEvent event) {
-        event.getDiscordEvent().getMessage().reply(event.getCommand().getMetaTags().get("test")).queue();
+        event.getDiscordEvent().getMessage().reply("pong").queue();
     }
 }

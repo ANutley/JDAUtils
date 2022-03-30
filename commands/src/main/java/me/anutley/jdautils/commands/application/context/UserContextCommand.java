@@ -4,12 +4,11 @@ import me.anutley.jdautils.commands.Command;
 import me.anutley.jdautils.commands.annotations.CommandMeta;
 import me.anutley.jdautils.commands.application.context.annotations.JDAUserContextCommand;
 import me.anutley.jdautils.commands.events.UserContextCommandEvent;
-import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
-public class UserContextCommand extends Command<JDAUserContextCommand, UserContextInteractionEvent> {
+public class UserContextCommand extends Command<JDAUserContextCommand, UserContextCommandEvent> {
 
     public UserContextCommand(JDAUserContextCommand command, Method commandMethod) {
         super(command, commandMethod);
@@ -46,10 +45,10 @@ public class UserContextCommand extends Command<JDAUserContextCommand, UserConte
     }
 
     @Override
-    public void execute(UserContextInteractionEvent event) {
+    public void execute(UserContextCommandEvent event) {
         try {
             getMethod().invoke(Class.forName(getMethod().getDeclaringClass().getName()).getConstructor().newInstance(),
-                    new UserContextCommandEvent(event, this));
+                    event);
         } catch (Exception e) {
             e.printStackTrace();
         }

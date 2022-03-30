@@ -26,7 +26,6 @@ public class CommandListener extends ListenerAdapter {
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         TextCommand command = manager.getTextCommandManager().getCommandFromEvent(event);
-        TextCommandEvent textCommandEvent = new TextCommandEvent(event, command);
 
         if (command == null) {
             if (manager.getTextCommandManager().getNoCommandFoundConsumer() != null) {
@@ -35,9 +34,23 @@ public class CommandListener extends ListenerAdapter {
             return;
         }
 
+        String messageContent = event.getMessage().getContentRaw().trim();
+        String[] args = messageContent.split(" ");
+
+        // Determine which args to pass on to the event
+        if (command.getUsedMentionAsPrefix()) {
+            // Add 1 to account for the space between the command and the first argument
+            messageContent = messageContent.substring(args[0].length() + args[1].length() + 1);
+        } else {
+            messageContent = messageContent.substring(args[0].length());
+        }
+
+        args = messageContent.replaceAll("\\s\\s+", " ").trim().split(" "); // Remove extra whitespace and split into an array
+        TextCommandEvent textCommandEvent = new TextCommandEvent(event, command, args);
+
         if (!check(textCommandEvent)) return;
 
-        command.execute(event);
+        command.execute(textCommandEvent);
     }
 
     @Override
@@ -48,7 +61,7 @@ public class CommandListener extends ListenerAdapter {
         if (slashCommand == null) return;
         if (!check(slashCommandEvent)) return;
 
-        slashCommand.execute(event);
+        slashCommand.execute(slashCommandEvent);
     }
 
     @Override
@@ -60,7 +73,7 @@ public class CommandListener extends ListenerAdapter {
         if (!check(contextEvent)) return;
 
 
-        command.execute(event);
+        command.execute(contextEvent);
     }
 
     @Override
@@ -71,7 +84,7 @@ public class CommandListener extends ListenerAdapter {
         if (command == null) return;
         if (!check(contextEvent)) return;
 
-        command.execute(event);
+        command.execute(contextEvent);
     }
 
 

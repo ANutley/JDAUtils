@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-public class SlashCommand extends Command<JDASlashCommand, SlashCommandInteractionEvent> {
+public class SlashCommand extends Command<JDASlashCommand, SlashCommandEvent> {
 
     public SlashCommand(JDASlashCommand command, Method commandMethod) {
         super(command, commandMethod);
@@ -50,69 +50,71 @@ public class SlashCommand extends Command<JDASlashCommand, SlashCommandInteracti
     }
 
     @Override
-    public void execute(SlashCommandInteractionEvent event) {
+    public void execute(SlashCommandEvent event) {
 
         LinkedList<SlashCommandOption> options = new LinkedList<>(SlashCommandOption.getOptions(this));
 
         ArrayList<Object> objects = new ArrayList<>();
-        objects.add(new SlashCommandEvent(event, this));
+        objects.add(event);
+
+        SlashCommandInteractionEvent discordEvent = event.getDiscordEvent();
 
         for (SlashCommandOption slashOption : options) {
 
             Object object = null;
             switch (slashOption.getOption().type()) {
                 case STRING:
-                    object = event.getOption(slashOption.getOption().name()).getAsString();
+                    object = discordEvent.getOption(slashOption.getOption().name()).getAsString();
                     break;
                 case INTEGER:
-                    object = event.getOption(slashOption.getOption().name()).getAsLong();
+                    object = discordEvent.getOption(slashOption.getOption().name()).getAsLong();
                     break;
                 case BOOLEAN:
-                    object = event.getOption(slashOption.getOption().name()).getAsBoolean();
+                    object = discordEvent.getOption(slashOption.getOption().name()).getAsBoolean();
                     break;
                 case USER:
                     if (slashOption.getOptionParameter().getType().equals(User.class))
-                        object = event.getOption(slashOption.getOption().name()).getAsUser();
+                        object = discordEvent.getOption(slashOption.getOption().name()).getAsUser();
                     if (slashOption.getOptionParameter().getType().equals(Member.class))
-                        object = event.getOption(slashOption.getOption().name()).getAsMember();
+                        object = discordEvent.getOption(slashOption.getOption().name()).getAsMember();
                     break;
                 case ROLE:
-                    object = event.getOption(slashOption.getOption().name()).getAsRole();
+                    object = discordEvent.getOption(slashOption.getOption().name()).getAsRole();
                     break;
                 case MENTIONABLE:
-                    object = event.getOption(slashOption.getOption().name()).getAsMentionable();
+                    object = discordEvent.getOption(slashOption.getOption().name()).getAsMentionable();
                     break;
 
                 case CHANNEL: {
                     if (slashOption.getOptionParameter().getType().equals(TextChannel.class))
-                        object = event.getOption(slashOption.getOption().name()).getAsTextChannel();
+                        object = discordEvent.getOption(slashOption.getOption().name()).getAsTextChannel();
 
                     if (slashOption.getOptionParameter().getType().equals(GuildMessageChannel.class))
-                        object = event.getOption(slashOption.getOption().name()).getAsGuildChannel();
+                        object = discordEvent.getOption(slashOption.getOption().name()).getAsGuildChannel();
 
                     if (slashOption.getOptionParameter().getType().equals(TextChannel.class))
-                        object = event.getOption(slashOption.getOption().name()).getAsTextChannel();
+                        object = discordEvent.getOption(slashOption.getOption().name()).getAsTextChannel();
 
                     if (slashOption.getOptionParameter().getType().equals(NewsChannel.class))
-                        object = event.getOption(slashOption.getOption().name()).getAsNewsChannel();
+                        object = discordEvent.getOption(slashOption.getOption().name()).getAsNewsChannel();
 
                     if (slashOption.getOptionParameter().getType().equals(ThreadChannel.class))
-                        object = event.getOption(slashOption.getOption().name()).getAsThreadChannel();
+                        object = discordEvent.getOption(slashOption.getOption().name()).getAsThreadChannel();
 
                     if (slashOption.getOptionParameter().getType().equals(VoiceChannel.class))
-                        object = event.getOption(slashOption.getOption().name()).getAsVoiceChannel();
+                        object = discordEvent.getOption(slashOption.getOption().name()).getAsVoiceChannel();
 
                     if (slashOption.getOptionParameter().getType().equals(StageChannel.class))
-                        object = event.getOption(slashOption.getOption().name()).getAsStageChannel();
+                        object = discordEvent.getOption(slashOption.getOption().name()).getAsStageChannel();
 
                     break;
                 }
 
                 case ATTACHMENT:
-                    object = event.getOption(slashOption.getOption().name()).getAsAttachment();
+                    object = discordEvent.getOption(slashOption.getOption().name()).getAsAttachment();
             }
 
-            objects.add(event.getOption(slashOption.getOption().name()) != null ? object : null);
+            objects.add(discordEvent.getOption(slashOption.getOption().name()) != null ? object : null);
         }
         try {
             getMethod().invoke(Class.forName(getMethod().getDeclaringClass().getName()).getConstructor().newInstance(), objects.toArray());

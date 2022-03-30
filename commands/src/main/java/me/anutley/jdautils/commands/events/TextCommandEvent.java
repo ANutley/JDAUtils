@@ -11,8 +11,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class TextCommandEvent extends CommandEvent<MessageReceivedEvent, TextCommand> {
 
-    public TextCommandEvent(MessageReceivedEvent event, TextCommand command) {
+    private final String[] args;
+    public TextCommandEvent(MessageReceivedEvent event, TextCommand command, String[] args) {
         super(event, command);
+        this.args = args;
     }
 
     @Override
@@ -43,6 +45,13 @@ public class TextCommandEvent extends CommandEvent<MessageReceivedEvent, TextCom
     @Override
     public boolean isFromGuild() {
         return getDiscordEvent().isFromGuild();
+    }
+
+    /**
+     * @return The args that sent when running this command. It determines the correct args regardless of whether the mention or normal prefix was used
+     */
+    public String[] getArgs() {
+        return args;
     }
 
 }

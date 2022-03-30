@@ -19,19 +19,22 @@ public class TextCommandManager {
     private final String defaultPrefix;
     private final Map<String, String> guildPrefixes;
     private final Consumer<MessageReceivedEvent> noCommandFoundConsumer;
+    private final boolean allowMentionAsPrefix;
 
     public TextCommandManager(
             CommandManager commandManager,
             List<TextCommand> commands,
             String defaultPrefix,
             Map<String, String> guildPrefixes,
-            Consumer<MessageReceivedEvent> noCommandFoundConsumer
+            Consumer<MessageReceivedEvent> noCommandFoundConsumer,
+            boolean allowMentionAsPrefix
     ) {
         this.commandManager = commandManager;
         this.commands = commands;
         this.defaultPrefix = defaultPrefix;
         this.guildPrefixes = guildPrefixes;
         this.noCommandFoundConsumer = noCommandFoundConsumer;
+        this.allowMentionAsPrefix = allowMentionAsPrefix;
     }
 
     /**
@@ -85,6 +88,14 @@ public class TextCommandManager {
         return noCommandFoundConsumer;
     }
 
+
+    /**
+     * @return Whether mentions are allowed to be used instead of a normal prefix
+     */
+    public boolean isAllowMentionAsPrefix() {
+        return allowMentionAsPrefix;
+    }
+
     /**
      * @return the text-command which has been found
      */
@@ -99,9 +110,16 @@ public class TextCommandManager {
 
         for (TextCommand command : this.getCommands()) {
 
-            if (!args[0].equals(prefix + command.getAnnotation().name())) continue;
+            if (args[0].equals(prefix + command.getAnnotation().name())) {
+                return command;
+            }
 
-            return command;
+            if (this.isAllowMentionAsPrefix()) {
+                if (args[0].matches("<@(!)?" + event.getJDA().getSelfUser().getId() + ">") && args[1].equals(command.getName())) {
+                    return command.setUsedMentionAsPrefix(true);
+                }
+            }
+
         }
         return null;
     }
@@ -112,6 +130,7 @@ public class TextCommandManager {
         private String defaultPrefix = "!";
         private Map<String, String> guildPrefixes = new HashMap<>();
         private Consumer<MessageReceivedEvent> noCommandFoundConsumer;
+        private boolean allowMentionAsPrefix = false;
 
 
         public Builder setDefaultPrefix(String defaultPrefix) {
@@ -150,6 +169,11 @@ public class TextCommandManager {
             return this;
         }
 
+        public Builder setAllowMentionAsPrefix(boolean allowMentionAsPrefix) {
+            this.allowMentionAsPrefix = allowMentionAsPrefix;
+            return this;
+        }
+
         public TextCommandManager build(CommandManager commandManager) {
             List<TextCommand> commands = new ArrayList<>();
 
@@ -166,7 +190,8 @@ public class TextCommandManager {
                     commands,
                     defaultPrefix,
                     guildPrefixes,
-                    noCommandFoundConsumer
+                    noCommandFoundConsumer,
+                    allowMentionAsPrefix
             );
         }
     }

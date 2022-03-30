@@ -20,8 +20,6 @@ public class StockCommands {
 
     @JDATextCommand(name = "say", description = "Repeats what you say", category = "utility")
     public void sayCommand(TextCommandEvent event) {
-        String args = event.getDiscordEvent().getMessage().getContentRaw();
-
-        event.getDiscordEvent().getMessage().reply(args.substring(args.split(" ")[0].length())).queue();
+        event.getDiscordEvent().getMessage().reply(String.join(" ", event.getArgs())).queue();
     }
 }

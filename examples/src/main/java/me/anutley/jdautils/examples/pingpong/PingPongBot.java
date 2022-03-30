@@ -25,6 +25,7 @@ public class PingPongBot {
                 .textCommandManager(textCommandManager -> { // Allows you to modify the text-command related settings
                             textCommandManager.setDefaultPrefix("!"); // Sets the global prefix for the bot
                             textCommandManager.setGuildPrefix("833042350850441216", "??"); // This is volatile, it needs to be reset after every restart
+                            textCommandManager.setAllowMentionAsPrefix(true); // Allow mentions to be used as prefixes
                         }
                 )
                 .build(jda);

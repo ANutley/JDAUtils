@@ -1,7 +1,7 @@
 package me.anutley.jdautils.commands;
 
 import me.anutley.jdautils.commands.annotations.CommandMeta;
-import net.dv8tion.jda.api.events.GenericEvent;
+import me.anutley.jdautils.commands.events.CommandEvent;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -12,9 +12,9 @@ import java.util.HashMap;
  *
  * @param <A> The annotation which contains the command related information such as the name, description, or category.
  *            It also contains command specific information, for example the slash command options for a slash command
- * @param <E> The Discord event which this event uses
+ * @param <E> The event which this event uses
  */
-public abstract class Command<A extends Annotation, E extends GenericEvent> {
+public abstract class Command<A extends Annotation, E extends CommandEvent<?, ?>> {
 
     private final A annotation;
     private final Method method;
