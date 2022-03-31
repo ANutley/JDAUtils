@@ -1,5 +1,6 @@
 package me.anutley.jdautils.commands;
 
+import me.anutley.jdautils.commands.annotations.BotPermission;
 import me.anutley.jdautils.commands.annotations.Command;
 import me.anutley.jdautils.commands.annotations.GuildOnly;
 import me.anutley.jdautils.commands.annotations.RequireRole;
@@ -7,6 +8,7 @@ import me.anutley.jdautils.commands.application.ApplicationCommandData;
 import me.anutley.jdautils.commands.events.CommandEvent;
 import me.anutley.jdautils.commands.utils.ReflectionsUtil;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.sharding.ShardManager;
@@ -30,6 +32,7 @@ public class CommandManager {
     private final Consumer<CommandEvent<?, ?>> notInGuildConsumer;
     private final Consumer<CommandEvent<?, ?>> notInNSFWChannelConsumer;
     private final BiConsumer<CommandEvent<?, ?>, Class<?>> doesNotMeetRequirementsConsumer;
+    private final BiConsumer<CommandEvent<?, ?>, Permission> botMissingPermissionConsumer;
 
     private final TextCommandManager textCommandManager;
     private final SlashCommandManager slashCommandManager;
@@ -43,18 +46,23 @@ public class CommandManager {
                           Consumer<CommandEvent<?, ?>> notInGuildConsumer,
                           Consumer<CommandEvent<?, ?>> notInNSFWChannelConsumer,
                           BiConsumer<CommandEvent<?, ?>, Class<?>> doesNotMeetRequirementsConsumer,
+                          BiConsumer<CommandEvent<?, ?>, Permission> botMissingPermissionConsumer,
                           TextCommandManager.Builder textCommandManager,
                           SlashCommandManager.Builder slashCommandManager,
                           ContextCommandManager.Builder contextCommandManager
 
     ) {
         this.jda = jda;
+
         this.commandClasses = commandClasses;
+
         this.permissionPredicate = permissionPredicate;
         this.noPermissionConsumer = noPermissionConsumer;
         this.notInGuildConsumer = notInGuildConsumer;
         this.notInNSFWChannelConsumer = notInNSFWChannelConsumer;
         this.doesNotMeetRequirementsConsumer = doesNotMeetRequirementsConsumer;
+        this.botMissingPermissionConsumer = botMissingPermissionConsumer;
+
         this.textCommandManager = textCommandManager.build(this);
         this.slashCommandManager = slashCommandManager.build(this);
         this.contextCommandManager = contextCommandManager.build(this);
@@ -67,18 +75,23 @@ public class CommandManager {
                           Consumer<CommandEvent<?, ?>> notInGuildConsumer,
                           Consumer<CommandEvent<?, ?>> notInNSFWChannelConsumer,
                           BiConsumer<CommandEvent<?, ?>, Class<?>> doesNotMeetRequirementsConsumer,
+                          BiConsumer<CommandEvent<?, ?>, Permission> botMissingPermissionConsumer,
                           TextCommandManager.Builder textCommandManager,
                           SlashCommandManager.Builder slashCommandManager,
                           ContextCommandManager.Builder contextCommandManager
 
     ) {
         this.shardManager = shardManager;
+
         this.commandClasses = commandClasses;
+
         this.permissionPredicate = permissionPredicate;
         this.noPermissionConsumer = noPermissionConsumer;
         this.notInGuildConsumer = notInGuildConsumer;
         this.notInNSFWChannelConsumer = notInNSFWChannelConsumer;
         this.doesNotMeetRequirementsConsumer = doesNotMeetRequirementsConsumer;
+        this.botMissingPermissionConsumer = botMissingPermissionConsumer;
+
         this.textCommandManager = textCommandManager.build(this);
         this.slashCommandManager = slashCommandManager.build(this);
         this.contextCommandManager = contextCommandManager.build(this);
@@ -139,10 +152,18 @@ public class CommandManager {
 
     /**
      * See {@link Builder#setDoesNotMeetRequirementConsumer(BiConsumer)} for more information
+     *
      * @return The consumer which will be accepted if the command has a requirement, but the environment in which the command was run does not fulfil this
      */
     public BiConsumer<CommandEvent<?, ?>, Class<?>> getDoesNotMeetRequirementsConsumer() {
         return doesNotMeetRequirementsConsumer;
+    }
+
+    /**
+     * @return The consumer which will be accepted if the bot is missing the permissions indicated by {@link BotPermission} in the Guild it is run (ignored in dms)
+     */
+    public BiConsumer<CommandEvent<?, ?>, Permission> getBotMissingPermissionConsumer() {
+        return botMissingPermissionConsumer;
     }
 
     /**
@@ -235,6 +256,7 @@ public class CommandManager {
         private Consumer<CommandEvent<?, ?>> notInGuildConsumer;
         private Consumer<CommandEvent<?, ?>> notInNSFWChannelConsumer;
         private BiConsumer<CommandEvent<?, ?>, Class<?>> doesNotMeetRequirementsConsumer;
+        private BiConsumer<CommandEvent<?, ?>, Permission> botMissingPermissionConsumer;
 
         private final TextCommandManager.Builder textCommandManager = new TextCommandManager.Builder();
         private final SlashCommandManager.Builder slashCommandManager = new SlashCommandManager.Builder();
@@ -326,6 +348,15 @@ public class CommandManager {
         }
 
         /**
+         * @param botMissingPermissionConsumer The consumer which will be accepted if the bot is missing the permissions indicated by {@link BotPermission} in the Guild it is run (ignored in dms)
+         * @return Itself for chaining convenience
+         */
+        public Builder setBotMissingPermissionConsumer(BiConsumer<CommandEvent<?, ?>, Permission> botMissingPermissionConsumer) {
+            this.botMissingPermissionConsumer = botMissingPermissionConsumer;
+            return this;
+        }
+
+        /**
          * @param consumer The consumer which modifies the text command manager
          * @return Itself for chaining convenience
          */
@@ -376,6 +407,7 @@ public class CommandManager {
                     notInGuildConsumer,
                     notInNSFWChannelConsumer,
                     doesNotMeetRequirementsConsumer,
+                    botMissingPermissionConsumer,
                     textCommandManager,
                     slashCommandManager,
                     contextCommandManager
@@ -409,6 +441,7 @@ public class CommandManager {
                     notInGuildConsumer,
                     notInNSFWChannelConsumer,
                     doesNotMeetRequirementsConsumer,
+                    botMissingPermissionConsumer,
                     textCommandManager,
                     slashCommandManager,
                     contextCommandManager

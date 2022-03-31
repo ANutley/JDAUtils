@@ -6,6 +6,7 @@ import me.anutley.jdautils.commands.application.context.UserContextCommand;
 import me.anutley.jdautils.commands.application.slash.SlashCommand;
 import me.anutley.jdautils.commands.events.*;
 import me.anutley.jdautils.commands.text.TextCommand;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.BaseGuildMessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -157,6 +158,15 @@ public class CommandListener extends ListenerAdapter {
             }
         }
 
+        // Check whether the bot has the permissions required
+        if (event.getCommand().getMethod().isAnnotationPresent(BotPermission.class)) {
+            Permission permission = event.getCommand().getMethod().getAnnotation(BotPermission.class).value();
+            if (event.getGuild() != null && !event.getGuild().getSelfMember().hasPermission(permission)) {
+                if (manager.getBotMissingPermissionConsumer() != null)
+                    manager.getBotMissingPermissionConsumer().accept(event, permission);
+                return false;
+            }
+        }
         return true;
     }
 
