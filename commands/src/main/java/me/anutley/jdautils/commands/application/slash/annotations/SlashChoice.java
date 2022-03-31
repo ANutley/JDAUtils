@@ -1,5 +1,10 @@
 package me.anutley.jdautils.commands.application.slash.annotations;
 
+import net.dv8tion.jda.api.interactions.commands.Command.Choice;
+
+/**
+ * An annotation to represent a {@link Choice} when registering a command
+ */
 public @interface SlashChoice {
 
     /**

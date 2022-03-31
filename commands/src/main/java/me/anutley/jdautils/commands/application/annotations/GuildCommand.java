@@ -10,7 +10,7 @@ import java.lang.annotation.RetentionPolicy;
 public @interface GuildCommand {
 
     /**
-     * @return returns the id of the guild that this command should be created in
+     * @return The id of the guild that this command should be created in
      */
     String value();
 }

@@ -1,11 +1,15 @@
 package me.anutley.jdautils.commands.application.slash.annotations;
 
 import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.interactions.commands.Command.Option;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+/**
+ * An annotation to represent a {@link Option} when registering commands
+ */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SlashOption {
 
