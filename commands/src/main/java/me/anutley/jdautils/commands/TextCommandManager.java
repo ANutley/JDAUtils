@@ -111,7 +111,7 @@ public class TextCommandManager {
         for (TextCommand command : this.getCommands()) {
 
             if (args[0].equals(prefix + command.getAnnotation().name())) {
-                return command;
+                return command.setUsedMentionAsPrefix(false);
             }
 
             if (this.isAllowMentionAsPrefix()) {
