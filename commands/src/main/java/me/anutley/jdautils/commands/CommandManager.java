@@ -2,6 +2,7 @@ package me.anutley.jdautils.commands;
 
 import me.anutley.jdautils.commands.annotations.Command;
 import me.anutley.jdautils.commands.annotations.GuildOnly;
+import me.anutley.jdautils.commands.annotations.RequireRole;
 import me.anutley.jdautils.commands.application.ApplicationCommandData;
 import me.anutley.jdautils.commands.events.CommandEvent;
 import me.anutley.jdautils.commands.utils.ReflectionsUtil;
@@ -13,6 +14,7 @@ import net.dv8tion.jda.api.sharding.ShardManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -27,6 +29,7 @@ public class CommandManager {
     private final Consumer<CommandEvent<?, ?>> noPermissionConsumer;
     private final Consumer<CommandEvent<?, ?>> notInGuildConsumer;
     private final Consumer<CommandEvent<?, ?>> notInNSFWChannelConsumer;
+    private final BiConsumer<CommandEvent<?, ?>, Class<?>> doesNotMeetRequirementsConsumer;
 
     private final TextCommandManager textCommandManager;
     private final SlashCommandManager slashCommandManager;
@@ -39,6 +42,7 @@ public class CommandManager {
                           Consumer<CommandEvent<?, ?>> noPermissionConsumer,
                           Consumer<CommandEvent<?, ?>> notInGuildConsumer,
                           Consumer<CommandEvent<?, ?>> notInNSFWChannelConsumer,
+                          BiConsumer<CommandEvent<?, ?>, Class<?>> doesNotMeetRequirementsConsumer,
                           TextCommandManager.Builder textCommandManager,
                           SlashCommandManager.Builder slashCommandManager,
                           ContextCommandManager.Builder contextCommandManager
@@ -50,6 +54,7 @@ public class CommandManager {
         this.noPermissionConsumer = noPermissionConsumer;
         this.notInGuildConsumer = notInGuildConsumer;
         this.notInNSFWChannelConsumer = notInNSFWChannelConsumer;
+        this.doesNotMeetRequirementsConsumer = doesNotMeetRequirementsConsumer;
         this.textCommandManager = textCommandManager.build(this);
         this.slashCommandManager = slashCommandManager.build(this);
         this.contextCommandManager = contextCommandManager.build(this);
@@ -61,6 +66,7 @@ public class CommandManager {
                           Consumer<CommandEvent<?, ?>> noPermissionConsumer,
                           Consumer<CommandEvent<?, ?>> notInGuildConsumer,
                           Consumer<CommandEvent<?, ?>> notInNSFWChannelConsumer,
+                          BiConsumer<CommandEvent<?, ?>, Class<?>> doesNotMeetRequirementsConsumer,
                           TextCommandManager.Builder textCommandManager,
                           SlashCommandManager.Builder slashCommandManager,
                           ContextCommandManager.Builder contextCommandManager
@@ -72,6 +78,7 @@ public class CommandManager {
         this.noPermissionConsumer = noPermissionConsumer;
         this.notInGuildConsumer = notInGuildConsumer;
         this.notInNSFWChannelConsumer = notInNSFWChannelConsumer;
+        this.doesNotMeetRequirementsConsumer = doesNotMeetRequirementsConsumer;
         this.textCommandManager = textCommandManager.build(this);
         this.slashCommandManager = slashCommandManager.build(this);
         this.contextCommandManager = contextCommandManager.build(this);
@@ -128,6 +135,14 @@ public class CommandManager {
      */
     public Consumer<CommandEvent<?, ?>> getNotInNSFWChannelConsumer() {
         return notInNSFWChannelConsumer;
+    }
+
+    /**
+     * See {@link Builder#setDoesNotMeetRequirementConsumer(BiConsumer)} for more information
+     * @return The consumer which will be accepted if the command has a requirement, but the environment in which the command was run does not fulfil this
+     */
+    public BiConsumer<CommandEvent<?, ?>, Class<?>> getDoesNotMeetRequirementsConsumer() {
+        return doesNotMeetRequirementsConsumer;
     }
 
     /**
@@ -219,6 +234,7 @@ public class CommandManager {
         private Consumer<CommandEvent<?, ?>> noPermissionConsumer;
         private Consumer<CommandEvent<?, ?>> notInGuildConsumer;
         private Consumer<CommandEvent<?, ?>> notInNSFWChannelConsumer;
+        private BiConsumer<CommandEvent<?, ?>, Class<?>> doesNotMeetRequirementsConsumer;
 
         private final TextCommandManager.Builder textCommandManager = new TextCommandManager.Builder();
         private final SlashCommandManager.Builder slashCommandManager = new SlashCommandManager.Builder();
@@ -285,6 +301,31 @@ public class CommandManager {
         }
 
         /**
+         * This consumer's requirements are determined by using one of the Require... annotations. For example {@link RequireRole}
+         * You run specific actions depending on the requirement which failed. For example:
+         * <code>
+         * <pre>
+         *     .setDoesNotMeetRequirementConsumer((event, annotation) -> {
+         *     if (annotation == RequireChannel.class) {
+         *         // Some logic here
+         *     }
+         *
+         *     if (annotation == RequireRole.class) {
+         *         // Some logic here
+         *     }
+         * })
+         * </pre>
+         * </code>
+         *
+         * @param doesNotMeetRequirementsConsumer The consumer which will be accepted if the command has a requirement, but the environment in which the command was run does not fulfil this
+         * @return Itself for chaining convenience
+         */
+        public Builder setDoesNotMeetRequirementConsumer(BiConsumer<CommandEvent<?, ?>, Class<?>> doesNotMeetRequirementsConsumer) {
+            this.doesNotMeetRequirementsConsumer = doesNotMeetRequirementsConsumer;
+            return this;
+        }
+
+        /**
          * @param consumer The consumer which modifies the text command manager
          * @return Itself for chaining convenience
          */
@@ -334,6 +375,7 @@ public class CommandManager {
                     noPermissionConsumer,
                     notInGuildConsumer,
                     notInNSFWChannelConsumer,
+                    doesNotMeetRequirementsConsumer,
                     textCommandManager,
                     slashCommandManager,
                     contextCommandManager
@@ -366,6 +408,7 @@ public class CommandManager {
                     noPermissionConsumer,
                     notInGuildConsumer,
                     notInNSFWChannelConsumer,
+                    doesNotMeetRequirementsConsumer,
                     textCommandManager,
                     slashCommandManager,
                     contextCommandManager

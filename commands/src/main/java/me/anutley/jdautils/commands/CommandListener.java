@@ -1,7 +1,6 @@
 package me.anutley.jdautils.commands;
 
-import me.anutley.jdautils.commands.annotations.GuildOnly;
-import me.anutley.jdautils.commands.annotations.NSFW;
+import me.anutley.jdautils.commands.annotations.*;
 import me.anutley.jdautils.commands.application.context.MessageContextCommand;
 import me.anutley.jdautils.commands.application.context.UserContextCommand;
 import me.anutley.jdautils.commands.application.slash.SlashCommand;
@@ -14,6 +13,8 @@ import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEven
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Arrays;
 
 public class CommandListener extends ListenerAdapter {
 
@@ -89,6 +90,7 @@ public class CommandListener extends ListenerAdapter {
 
 
     private boolean check(CommandEvent<?, ?> event) {
+        // Check whether the user has the correct permissions
         if (manager.getPermissionPredicate() != null)
             if (!manager.getPermissionPredicate().test(event)) {
                 if (manager.getNoPermissionConsumer() != null)
@@ -96,12 +98,14 @@ public class CommandListener extends ListenerAdapter {
                 return false;
             }
 
+        // Check whether this command is guild only, and if it's been run in an guild
         if (event.getCommand().getMethod().isAnnotationPresent(GuildOnly.class) && !event.isFromGuild()) {
             if (manager.getNotInGuildConsumer() != null)
                 manager.getNotInGuildConsumer().accept(event);
             return false;
         }
 
+        // Check whether this command is NSFW only, and if it's been run in an NSFW channel
         if (event.getCommand().getMethod().isAnnotationPresent(NSFW.class)) {
             if (event.getMessageChannel() instanceof BaseGuildMessageChannel) {
                 if (!((BaseGuildMessageChannel) event.getMessageChannel()).isNSFW())
@@ -112,7 +116,52 @@ public class CommandListener extends ListenerAdapter {
             }
         }
 
+        // Check the various requirements needed to run the command, and whether they have been met
+        if (event.getCommand().getMethod().isAnnotationPresent(RequireUser.class)) {
+            String[] userIds = event.getCommand().getMethod().getAnnotation(RequireUser.class).value();
+            if (!Arrays.asList(userIds).contains(event.getUser().getId())) {
+                acceptRequirementConsumer(event, RequireUser.class);
+                return false;
+            }
+        }
+
+        if (event.getCommand().getMethod().isAnnotationPresent(RequireRole.class)) {
+            String[] roleIds = event.getCommand().getMethod().getAnnotation(RequireRole.class).value();
+
+            boolean isAllowed = false;
+            for (String roleId : roleIds) {
+                if (event.getMember() == null) break;
+                if (event.getMember().getRoles().stream().anyMatch(r -> r.getId().equals(roleId)))
+                    isAllowed = true;
+            }
+
+            if (!isAllowed) {
+                acceptRequirementConsumer(event, RequireRole.class);
+                return false;
+            }
+        }
+
+        if (event.getCommand().getMethod().isAnnotationPresent(RequireChannel.class)) {
+            String[] channelIds = event.getCommand().getMethod().getAnnotation(RequireChannel.class).value();
+            if (!Arrays.asList(channelIds).contains(event.getMessageChannel().getId())) {
+                acceptRequirementConsumer(event, RequireChannel.class);
+                return false;
+            }
+        }
+
+        if (event.getCommand().getMethod().isAnnotationPresent(RequireGuild.class)) {
+            String[] guildIds = event.getCommand().getMethod().getAnnotation(RequireGuild.class).value();
+            if (event.getGuild() == null || !Arrays.asList(guildIds).contains(event.getGuild().getId())) {
+                acceptRequirementConsumer(event, RequireGuild.class);
+                return false;
+            }
+        }
+
         return true;
     }
 
+    private void acceptRequirementConsumer(CommandEvent<?, ?> event, Class<?> requirementClass) {
+        if (manager.getDoesNotMeetRequirementsConsumer() != null)
+            manager.getDoesNotMeetRequirementsConsumer().accept(event, requirementClass);
+    }
 }
