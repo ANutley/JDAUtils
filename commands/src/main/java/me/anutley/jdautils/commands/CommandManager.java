@@ -5,6 +5,7 @@ import me.anutley.jdautils.commands.annotations.Command;
 import me.anutley.jdautils.commands.annotations.GuildOnly;
 import me.anutley.jdautils.commands.annotations.RequireRole;
 import me.anutley.jdautils.commands.application.ApplicationCommandData;
+import me.anutley.jdautils.commands.application.annotations.GuildCommand;
 import me.anutley.jdautils.commands.events.CommandEvent;
 import me.anutley.jdautils.commands.utils.ReflectionsUtil;
 import net.dv8tion.jda.api.JDA;
@@ -38,6 +39,8 @@ public class CommandManager {
     private final SlashCommandManager slashCommandManager;
     private final ContextCommandManager contextCommandManager;
 
+    private final String testingGuildId;
+
 
     public CommandManager(JDA jda,
                           List<Class<?>> commandClasses,
@@ -49,9 +52,9 @@ public class CommandManager {
                           BiConsumer<CommandEvent<?, ?>, Permission> botMissingPermissionConsumer,
                           TextCommandManager.Builder textCommandManager,
                           SlashCommandManager.Builder slashCommandManager,
-                          ContextCommandManager.Builder contextCommandManager
+                          ContextCommandManager.Builder contextCommandManager,
 
-    ) {
+                          String testingGuildId) {
         this.jda = jda;
 
         this.commandClasses = commandClasses;
@@ -66,6 +69,8 @@ public class CommandManager {
         this.textCommandManager = textCommandManager.build(this);
         this.slashCommandManager = slashCommandManager.build(this);
         this.contextCommandManager = contextCommandManager.build(this);
+
+        this.testingGuildId = testingGuildId;
     }
 
     public CommandManager(ShardManager shardManager,
@@ -78,9 +83,9 @@ public class CommandManager {
                           BiConsumer<CommandEvent<?, ?>, Permission> botMissingPermissionConsumer,
                           TextCommandManager.Builder textCommandManager,
                           SlashCommandManager.Builder slashCommandManager,
-                          ContextCommandManager.Builder contextCommandManager
+                          ContextCommandManager.Builder contextCommandManager,
 
-    ) {
+                          String testingGuildId) {
         this.shardManager = shardManager;
 
         this.commandClasses = commandClasses;
@@ -95,6 +100,8 @@ public class CommandManager {
         this.textCommandManager = textCommandManager.build(this);
         this.slashCommandManager = slashCommandManager.build(this);
         this.contextCommandManager = contextCommandManager.build(this);
+
+        this.testingGuildId = testingGuildId;
     }
 
     /**
@@ -187,6 +194,10 @@ public class CommandManager {
         return contextCommandManager;
     }
 
+    public String getTestingGuildId() {
+        return testingGuildId;
+    }
+
     public List<me.anutley.jdautils.commands.Command<?, ?>> getCommands() {
         return new ArrayList<me.anutley.jdautils.commands.Command<?, ?>>() {{
             addAll(getTextCommandManager().getCommands());
@@ -261,6 +272,8 @@ public class CommandManager {
         private final TextCommandManager.Builder textCommandManager = new TextCommandManager.Builder();
         private final SlashCommandManager.Builder slashCommandManager = new SlashCommandManager.Builder();
         private final ContextCommandManager.Builder contextCommandManager = new ContextCommandManager.Builder();
+
+        private String testingGuildId;
 
 
         /**
@@ -383,6 +396,17 @@ public class CommandManager {
             return this;
         }
 
+        /**
+         * This is used to set a Guild to register interactions to while testing. This means that your interactions will only be available in the provided Guild while this option is being used
+         * This option overrides, and does not need the use of {@link GuildCommand}
+         *
+         * @param testingGuildId The ID of the testing Guild
+         * @return Itself for chaining convenience
+         */
+        public Builder setTestingGuildId(String testingGuildId) {
+            this.testingGuildId = testingGuildId;
+            return this;
+        }
 
         /**
          * @param jda The JDA instance which should be used to register event listeners
@@ -410,8 +434,8 @@ public class CommandManager {
                     botMissingPermissionConsumer,
                     textCommandManager,
                     slashCommandManager,
-                    contextCommandManager
-            );
+                    contextCommandManager,
+                    testingGuildId);
 
             jda.addEventListener(new CommandListener(commandManager)); // Add the command listener
 
@@ -444,8 +468,8 @@ public class CommandManager {
                     botMissingPermissionConsumer,
                     textCommandManager,
                     slashCommandManager,
-                    contextCommandManager
-            );
+                    contextCommandManager,
+                    testingGuildId);
 
             shardManager.addEventListener(new CommandListener(commandManager)); // Add the command listener
 

@@ -1,8 +1,8 @@
 package me.anutley.jdautils.commands;
 
+import me.anutley.jdautils.commands.application.ApplicationCommandData;
 import me.anutley.jdautils.commands.application.annotations.GuildCommand;
 import me.anutley.jdautils.commands.application.slash.SlashCommand;
-import me.anutley.jdautils.commands.application.ApplicationCommandData;
 import me.anutley.jdautils.commands.application.slash.SlashCommandOption;
 import me.anutley.jdautils.commands.application.slash.annotations.JDASlashCommand;
 import net.dv8tion.jda.api.entities.ChannelType;
@@ -16,8 +16,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class SlashCommandManager {
@@ -66,6 +64,8 @@ public class SlashCommandManager {
                 if (slashCommand.getMethod().isAnnotationPresent(GuildCommand.class))
                     // If it's a guild command, set the guild id, so we can register it guild-wide instead of globally
                     guildId = slashCommand.getMethod().getAnnotation(GuildCommand.class).value();
+
+                if (commandManager.getTestingGuildId() != null) guildId = commandManager.getTestingGuildId();
 
                 LinkedList<SlashCommandOption> options = new LinkedList<>(SlashCommandOption.getOptions(slashCommand));
 

@@ -70,6 +70,8 @@ public class ContextCommandManager {
             if (command.getMethod().isAnnotationPresent(GuildCommand.class))
                 guildId = command.getMethod().getAnnotation(GuildCommand.class).value();
 
+            if (commandManager.getTestingGuildId() != null) guildId = commandManager.getTestingGuildId();
+
             CommandData data = null;
             if (command instanceof MessageContextCommand) data = Commands.message(command.getName());
             if (command instanceof UserContextCommand) data = Commands.user(command.getName());
