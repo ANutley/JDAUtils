@@ -6,7 +6,15 @@ import me.anutley.jdautils.commands.annotations.GuildOnly;
 import me.anutley.jdautils.commands.annotations.RequireRole;
 import me.anutley.jdautils.commands.application.ApplicationCommandData;
 import me.anutley.jdautils.commands.application.annotations.GuildCommand;
+import me.anutley.jdautils.commands.application.context.MessageContextCommand;
+import me.anutley.jdautils.commands.application.context.UserContextCommand;
+import me.anutley.jdautils.commands.application.context.annotations.JDAMessageContextCommand;
+import me.anutley.jdautils.commands.application.context.annotations.JDAUserContextCommand;
+import me.anutley.jdautils.commands.application.slash.SlashCommand;
+import me.anutley.jdautils.commands.application.slash.annotations.JDASlashCommand;
 import me.anutley.jdautils.commands.events.CommandEvent;
+import me.anutley.jdautils.commands.text.TextCommand;
+import me.anutley.jdautils.commands.text.annotations.JDATextCommand;
 import me.anutley.jdautils.commands.utils.ReflectionsUtil;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
@@ -14,7 +22,10 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.sharding.ShardManager;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -27,6 +38,7 @@ public class CommandManager {
     private ShardManager shardManager;
 
     private final List<Class<?>> commandClasses;
+    private final List<Object> manuallyAddedCommandInstances;
 
     private final Predicate<CommandEvent<?, ?>> permissionPredicate;
     private final Consumer<CommandEvent<?, ?>> noPermissionConsumer;
@@ -44,6 +56,7 @@ public class CommandManager {
 
     public CommandManager(JDA jda,
                           List<Class<?>> commandClasses,
+                          List<Object> manuallyAddedCommandInstances,
                           Predicate<CommandEvent<?, ?>> permissionPredicate,
                           Consumer<CommandEvent<?, ?>> noPermissionConsumer,
                           Consumer<CommandEvent<?, ?>> notInGuildConsumer,
@@ -58,6 +71,7 @@ public class CommandManager {
         this.jda = jda;
 
         this.commandClasses = commandClasses;
+        this.manuallyAddedCommandInstances = manuallyAddedCommandInstances;
 
         this.permissionPredicate = permissionPredicate;
         this.noPermissionConsumer = noPermissionConsumer;
@@ -75,6 +89,7 @@ public class CommandManager {
 
     public CommandManager(ShardManager shardManager,
                           List<Class<?>> commandClasses,
+                          List<Object> manuallyAddedCommandInstances,
                           Predicate<CommandEvent<?, ?>> permissionPredicate,
                           Consumer<CommandEvent<?, ?>> noPermissionConsumer,
                           Consumer<CommandEvent<?, ?>> notInGuildConsumer,
@@ -89,6 +104,7 @@ public class CommandManager {
         this.shardManager = shardManager;
 
         this.commandClasses = commandClasses;
+        this.manuallyAddedCommandInstances = manuallyAddedCommandInstances;
 
         this.permissionPredicate = permissionPredicate;
         this.noPermissionConsumer = noPermissionConsumer;
@@ -127,6 +143,13 @@ public class CommandManager {
      */
     public List<Class<?>> getCommandClasses() {
         return commandClasses;
+    }
+
+    /**
+     * @return A list of command instances which have been added manually, rather than using reflection
+     */
+    public List<Object> getCommandInstances() {
+        return manuallyAddedCommandInstances;
     }
 
     /**
@@ -246,6 +269,7 @@ public class CommandManager {
 
         // Group the commands by guild ids to add all the guild commands to each guild in one go
         for (Map.Entry<String, List<CommandData>> entry : ApplicationCommandData.sortByGuildId(guildCommands).entrySet()) {
+            entry.getValue().forEach(commandData -> System.out.println(commandData.getName()));
 
             // Get either the jda instance or the shard manager depending on what they initialised the command manager with.
             Guild guild = getJda() == null ? getShardManager().getGuildById(entry.getKey()) : getJda().getGuildById(entry.getKey());
@@ -261,6 +285,7 @@ public class CommandManager {
 
         private final List<String> searchPaths = new ArrayList<>();
         private final List<Class<?>> commandClasses = new ArrayList<>();
+        private final List<Object> manuallyAddedCommandInstances = new ArrayList<>();
 
         private Predicate<CommandEvent<?, ?>> permissionPredicate;
         private Consumer<CommandEvent<?, ?>> noPermissionConsumer;
@@ -296,6 +321,19 @@ public class CommandManager {
          */
         public Builder addCommandClass(Class<?> commandClass) {
             this.commandClasses.add(commandClass);
+            return this;
+        }
+
+        /**
+         * Adds an instance of a command, used both to search for commands in / invoke command methods
+         * This is useful if you need to pass something in the constructor of a command instance.
+         * This should be used over {@link #addCommandClass(Class)} when possible
+         *
+         * @param instance The instance of the command
+         * @return Itself for chaining convenience
+         */
+        public <T> Builder addCommandInstance(T instance) {
+            this.manuallyAddedCommandInstances.add(instance);
             return this;
         }
 
@@ -426,6 +464,7 @@ public class CommandManager {
             CommandManager commandManager = new CommandManager(
                     jda,
                     classes,
+                    manuallyAddedCommandInstances,
                     permissionPredicate,
                     noPermissionConsumer,
                     notInGuildConsumer,
@@ -447,7 +486,7 @@ public class CommandManager {
          * @return The built command manager instance
          */
         public CommandManager build(ShardManager shardManager) {
-            List<Class<?>> classes = new ArrayList<>(commandClasses);
+            List<Class<?>> classes = new ArrayList<>();
 
             for (String path : searchPaths) {
                 classes.addAll(ReflectionsUtil.getClassesWithAnnotationsByPackage(path, Command.class));
@@ -460,6 +499,7 @@ public class CommandManager {
             CommandManager commandManager = new CommandManager(
                     shardManager,
                     classes,
+                    manuallyAddedCommandInstances,
                     permissionPredicate,
                     noPermissionConsumer,
                     notInGuildConsumer,
@@ -477,4 +517,47 @@ public class CommandManager {
         }
     }
 
+    protected List<me.anutley.jdautils.commands.Command<?, ?>> getCommandsByType(Class<? extends Annotation> commandType) {
+        List<me.anutley.jdautils.commands.Command<?, ?>> commands = new ArrayList<>();
+
+        Map<Method, Object> methodInstanceMap = new HashMap<>();
+
+        for (Class<?> clazz : getCommandClasses()) {
+            try {
+                Object instance = clazz.newInstance();
+
+                for (Method method : clazz.getMethods())
+                    methodInstanceMap.put(method, instance);
+
+            } catch (Exception ignored) {
+            }
+        }
+
+        for (Object instance : getCommandInstances())
+            for (Method method : instance.getClass().getMethods())
+                methodInstanceMap.put(method, instance);
+
+        for (Map.Entry<Method, Object> entrySet : methodInstanceMap.entrySet()) {
+            if (entrySet.getKey().isAnnotationPresent(commandType)) {
+
+                Method method = entrySet.getKey();
+                Object instance = entrySet.getValue();
+
+                if (commandType == JDATextCommand.class)
+                    commands.add(new TextCommand(method.getAnnotation(JDATextCommand.class), method, instance));
+
+                if (commandType == JDASlashCommand.class)
+                    commands.add(new SlashCommand(method.getAnnotation(JDASlashCommand.class), method, instance));
+
+                if (commandType == JDAMessageContextCommand.class)
+                    commands.add(new MessageContextCommand(method.getAnnotation(JDAMessageContextCommand.class), method, instance));
+
+                if (commandType == JDAUserContextCommand.class)
+                    commands.add(new UserContextCommand(method.getAnnotation(JDAUserContextCommand.class), method, instance));
+            }
+        }
+
+        return commands;
+
+    }
 }

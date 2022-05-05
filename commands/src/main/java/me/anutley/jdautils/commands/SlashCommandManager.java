@@ -11,7 +11,6 @@ import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.*;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -161,19 +160,16 @@ public class SlashCommandManager {
          * @return The built command manager
          */
         public SlashCommandManager build(CommandManager commandManager) {
-            List<SlashCommand> commands = new ArrayList<>();
+            List<me.anutley.jdautils.commands.Command<?, ?>> commands = new ArrayList<>(commandManager.getCommandsByType(JDASlashCommand.class));
 
-            for (Class<?> clazz : commandManager.getCommandClasses()) {
-                for (Method method : clazz.getMethods()) {
-                    if (method.isAnnotationPresent(JDASlashCommand.class)) {
-                        commands.add(new SlashCommand(method.getAnnotation(JDASlashCommand.class), method));
-                    }
-                }
-            }
+            List<SlashCommand> slashCommands = new ArrayList<SlashCommand>() {{
+                for (me.anutley.jdautils.commands.Command<?, ?> command : commands)
+                    add((SlashCommand) command);
+            }};
 
             return new SlashCommandManager(
                     commandManager,
-                    commands
+                    slashCommands
             );
         }
     }

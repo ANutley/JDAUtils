@@ -12,8 +12,8 @@ public class TextCommand extends Command<JDATextCommand, TextCommandEvent> {
 
     private boolean usedMentionAsPrefix;
 
-    public TextCommand(JDATextCommand command, Method commandMethod) {
-        super(command, commandMethod);
+    public <T> TextCommand(JDATextCommand command, Method commandMethod, T instance) {
+        super(command, commandMethod, instance);
     }
 
     @Override
@@ -65,9 +65,7 @@ public class TextCommand extends Command<JDATextCommand, TextCommandEvent> {
     @Override
     public void execute(TextCommandEvent event) {
         try {
-            getMethod().invoke(Class.forName(getMethod().getDeclaringClass().getName()).getConstructor().newInstance(),
-                    event
-            );
+            getMethod().invoke(getInstance(), event);
         } catch (Exception e) {
             e.printStackTrace();
         }

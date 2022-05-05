@@ -2,7 +2,6 @@ package me.anutley.jdautils.examples.helpcommand;
 
 import me.anutley.jdautils.commands.annotations.Command;
 import me.anutley.jdautils.commands.events.TextCommandEvent;
-import me.anutley.jdautils.commands.text.TextCommand;
 import me.anutley.jdautils.commands.text.annotations.JDATextCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 

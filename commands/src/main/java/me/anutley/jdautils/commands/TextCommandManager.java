@@ -5,7 +5,6 @@ import me.anutley.jdautils.commands.text.annotations.JDATextCommand;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -175,19 +174,16 @@ public class TextCommandManager {
         }
 
         public TextCommandManager build(CommandManager commandManager) {
-            List<TextCommand> commands = new ArrayList<>();
+            List<Command<?, ?>> commands = new ArrayList<>(commandManager.getCommandsByType(JDATextCommand.class));
+            List<TextCommand> textCommands = new ArrayList<TextCommand>() {{
+               for (Command<?, ?> command : commands)
+                   add((TextCommand) command);
+            }};
 
-            for (Class<?> clazz : commandManager.getCommandClasses()) {
-                for (Method method : clazz.getMethods()) {
-                    if (method.isAnnotationPresent(JDATextCommand.class)) {
-                        commands.add(new TextCommand(method.getAnnotation(JDATextCommand.class), method));
-                    }
-                }
-            }
 
             return new TextCommandManager(
                     commandManager,
-                    commands,
+                    textCommands,
                     defaultPrefix,
                     guildPrefixes,
                     noCommandFoundConsumer,

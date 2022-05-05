@@ -15,8 +15,8 @@ import java.util.List;
 
 public class SlashCommand extends Command<JDASlashCommand, SlashCommandEvent> {
 
-    public SlashCommand(JDASlashCommand command, Method commandMethod) {
-        super(command, commandMethod);
+    public <T> SlashCommand(JDASlashCommand command, Method commandMethod, T instance) {
+        super(command, commandMethod, instance);
     }
 
     @Override
@@ -117,7 +117,7 @@ public class SlashCommand extends Command<JDASlashCommand, SlashCommandEvent> {
             objects.add(discordEvent.getOption(slashOption.getOption().name()) != null ? object : null);
         }
         try {
-            getMethod().invoke(Class.forName(getMethod().getDeclaringClass().getName()).getConstructor().newInstance(), objects.toArray());
+            getMethod().invoke(getInstance(), objects.toArray());
         } catch (Exception e) {
             e.printStackTrace();
         }

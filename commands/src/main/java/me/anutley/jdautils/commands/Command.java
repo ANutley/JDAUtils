@@ -18,28 +18,37 @@ public abstract class Command<A extends Annotation, E extends CommandEvent<?, ?>
 
     private final A annotation;
     private final Method method;
+    private final Object instance;
 
     /**
      * @param annotation The annotation that the command method has, to retrieve information such as the name or description
      * @param method     The method which correlates to this command
      */
-    public Command(A annotation, Method method) {
+    public <T> Command(A annotation, Method method, T instance) {
         this.annotation = annotation;
         this.method = method;
+        this.instance = instance;
     }
 
     /**
-     * @return - Returns the annotation which holds the information about this command
+     * @return Returns the annotation which holds the information about this command
      */
     public A getAnnotation() {
         return annotation;
     }
 
     /**
-     * @return - Returns the method which is invoked to execute the command
+     * @return Returns the method which is invoked to execute the command
      */
     public Method getMethod() {
         return method;
+    }
+
+    /**
+     * @return Returns an instance of the command class, this is used to invoke the command method
+     */
+    public Object getInstance() {
+        return instance;
     }
 
     /**

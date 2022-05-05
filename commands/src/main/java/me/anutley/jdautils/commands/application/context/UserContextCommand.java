@@ -10,8 +10,8 @@ import java.util.HashMap;
 
 public class UserContextCommand extends Command<JDAUserContextCommand, UserContextCommandEvent> {
 
-    public UserContextCommand(JDAUserContextCommand command, Method commandMethod) {
-        super(command, commandMethod);
+    public <T> UserContextCommand(JDAUserContextCommand command, Method commandMethod, T instance) {
+        super(command, commandMethod, instance);
     }
 
     @Override
@@ -47,8 +47,7 @@ public class UserContextCommand extends Command<JDAUserContextCommand, UserConte
     @Override
     public void execute(UserContextCommandEvent event) {
         try {
-            getMethod().invoke(Class.forName(getMethod().getDeclaringClass().getName()).getConstructor().newInstance(),
-                    event);
+            getMethod().invoke(getInstance(), event);
         } catch (Exception e) {
             e.printStackTrace();
         }

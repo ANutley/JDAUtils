@@ -10,8 +10,8 @@ import java.util.HashMap;
 
 public class MessageContextCommand extends Command<JDAMessageContextCommand, MessageContextCommandEvent> {
 
-    public MessageContextCommand(JDAMessageContextCommand command, Method commandMethod) {
-        super(command, commandMethod);
+    public <T> MessageContextCommand(JDAMessageContextCommand command, Method commandMethod, T instance) {
+        super(command, commandMethod, instance);
     }
 
     @Override
@@ -47,8 +47,7 @@ public class MessageContextCommand extends Command<JDAMessageContextCommand, Mes
     @Override
     public void execute(MessageContextCommandEvent event) {
         try {
-            getMethod().invoke(Class.forName(getMethod().getDeclaringClass().getName()).getConstructor().newInstance(),
-                    event);
+            getMethod().invoke(getInstance(), event);
         } catch (Exception e) {
             e.printStackTrace();
         }

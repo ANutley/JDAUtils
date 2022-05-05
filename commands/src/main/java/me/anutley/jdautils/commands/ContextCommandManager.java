@@ -11,7 +11,6 @@ import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEven
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -110,18 +109,20 @@ public class ContextCommandManager {
          */
         public ContextCommandManager build(CommandManager commandManager) {
 
-            List<MessageContextCommand> messageContextCommands = new ArrayList<>();
-            List<UserContextCommand> userContextCommands = new ArrayList<>();
+            List<Command<?, ?>> genericMessageContextCommands = new ArrayList<>(commandManager.getCommandsByType(JDAMessageContextCommand.class));
 
-            for (Class<?> clazz : commandManager.getCommandClasses()) {
-                for (Method method : clazz.getMethods()) {
-                    if (method.isAnnotationPresent(JDAMessageContextCommand.class)) {
-                        messageContextCommands.add(new MessageContextCommand(method.getAnnotation(JDAMessageContextCommand.class), method));
-                    } else if (method.isAnnotationPresent(JDAUserContextCommand.class)) {
-                        userContextCommands.add(new UserContextCommand(method.getAnnotation(JDAUserContextCommand.class), method));
-                    }
-                }
-            }
+            List<MessageContextCommand> messageContextCommands = new ArrayList<MessageContextCommand>() {{
+                for (me.anutley.jdautils.commands.Command<?, ?> command : genericMessageContextCommands)
+                    add((MessageContextCommand) command);
+            }};
+
+
+            List<Command<?, ?>> genericUserContextCommands = new ArrayList<>(commandManager.getCommandsByType(JDAUserContextCommand.class));
+
+            List<UserContextCommand> userContextCommands = new ArrayList<UserContextCommand>() {{
+                for (me.anutley.jdautils.commands.Command<?, ?> command : genericUserContextCommands)
+                    add((UserContextCommand) command);
+            }};
 
             return new ContextCommandManager(
                     commandManager,
