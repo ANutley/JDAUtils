@@ -17,9 +17,9 @@ import java.util.function.Consumer;
 
 public class ReactionMenu extends Menu {
 
-    private final Message initialMessage;
-    private final Consumer<MessageReactionAddEvent> action;
-    private final List<String> reactions;
+    protected final Message initialMessage;
+    protected final Consumer<MessageReactionAddEvent> action;
+    protected final List<String> reactions;
 
     public ReactionMenu(EventWaiter eventWaiter, List<User> allowedUsers, List<Role> allowedRoles, long timeout, TimeUnit units, boolean recursive, boolean ephemeral, Message initialMessage, Consumer<MessageReactionAddEvent> action, List<String> reactions) {
         super(eventWaiter, allowedUsers, allowedRoles, timeout, units, recursive, ephemeral);
@@ -68,9 +68,9 @@ public class ReactionMenu extends Menu {
 
     public static class Builder extends Menu.Builder<ReactionMenu.Builder, ReactionMenu> {
 
-        private Message initialMessage = null;
-        private Consumer<MessageReactionAddEvent> action = null;
-        private List<String> reactions = new ArrayList<>();
+        protected Message initialMessage = null;
+        protected Consumer<MessageReactionAddEvent> action = null;
+        protected List<String> reactions = new ArrayList<>();
 
         @Override
         public ReactionMenu build() {

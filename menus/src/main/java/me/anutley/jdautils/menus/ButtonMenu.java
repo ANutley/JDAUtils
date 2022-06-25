@@ -18,9 +18,9 @@ import java.util.function.Consumer;
 
 public class ButtonMenu extends Menu {
 
-    private final Message initialMessage;
-    private final Consumer<ButtonInteractionEvent> action;
-    private final List<ActionRow> actionRows;
+    protected final Message initialMessage;
+    protected final Consumer<ButtonInteractionEvent> action;
+    protected final List<ActionRow> actionRows;
 
     public ButtonMenu(EventWaiter eventWaiter, List<User> allowedUsers, List<Role> allowedRoles, long timeout, TimeUnit units, boolean recursive, boolean ephemeral, Message initialMessage, Consumer<ButtonInteractionEvent> action, List<ActionRow> actionRows) {
         super(eventWaiter, allowedUsers, allowedRoles, timeout, units, recursive, ephemeral);
@@ -67,9 +67,9 @@ public class ButtonMenu extends Menu {
 
     public static class Builder extends Menu.Builder<Builder, ButtonMenu> {
 
-        private Message initialMessage = null;
-        private Consumer<ButtonInteractionEvent> action = null;
-        private List<ActionRow> actionRows = new ArrayList<>();
+        protected Message initialMessage = null;
+        protected Consumer<ButtonInteractionEvent> action = null;
+        protected List<ActionRow> actionRows = new ArrayList<>();
 
         @Override
         public ButtonMenu build() {

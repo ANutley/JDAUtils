@@ -19,9 +19,9 @@ import java.util.function.Consumer;
 public class SelectionMenu extends Menu {
 
 
-    private final Message initialMessage;
-    private final Consumer<SelectMenuInteractionEvent> action;
-    private final List<ActionRow> actionRows;
+    protected final Message initialMessage;
+    protected final Consumer<SelectMenuInteractionEvent> action;
+    protected final List<ActionRow> actionRows;
 
     public SelectionMenu(EventWaiter eventWaiter, List<User> allowedUsers, List<Role> allowedRoles, long timeout, TimeUnit units, boolean recursive, boolean ephemeral, Message initialMessage, Consumer<SelectMenuInteractionEvent> action, List<ActionRow> actionRows) {
         super(eventWaiter, allowedUsers, allowedRoles, timeout, units, recursive, ephemeral);
@@ -66,9 +66,9 @@ public class SelectionMenu extends Menu {
 
     public static class Builder extends Menu.Builder<SelectionMenu.Builder, SelectionMenu> {
 
-        private Message initialMessage = null;
-        private Consumer<SelectMenuInteractionEvent> action = null;
-        private List<ActionRow> actionRows = new ArrayList<>();
+        protected Message initialMessage = null;
+        protected Consumer<SelectMenuInteractionEvent> action = null;
+        protected List<ActionRow> actionRows = new ArrayList<>();
 
         @Override
         public SelectionMenu build() {
