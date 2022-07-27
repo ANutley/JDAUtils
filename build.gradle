@@ -1,11 +1,4 @@
-plugins {
-    id 'java'
-    id 'maven-publish'
-}
-
 allprojects {
-
-    apply plugin: 'java'
     apply plugin: 'maven-publish'
 
     group 'me.anutley'
@@ -13,7 +6,6 @@ allprojects {
 
     ext {
         dependencies {
-
             // Creates shortcuts to avoid repeating dependencies throughout modules
             jda = { [group: 'net.dv8tion', name: 'JDA', version: "5.0.0-alpha.9"] }
             logback = { [group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.10'] }
@@ -30,7 +22,6 @@ allprojects {
 
     publishing {
         if (project.getName() != "examples") {
-
             publications {
                 maven(MavenPublication) {
                     groupId = project.group
@@ -53,18 +44,14 @@ allprojects {
             }
         }
     }
+}
 
-    rootProject.subprojects.forEach { submodule ->
-        project.ext."$submodule.name" = { project(":$submodule.name") }
-    }
+subprojects {
+    apply plugin: 'java'
 
     java {
         sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
     }
-
-}
-
-subprojects {
 
     if (project.getName() != "examples") {
         publishing {
@@ -74,34 +61,27 @@ subprojects {
                 }
             }
         }
+    }
+}
 
-        afterEvaluate {
-            rootProject.dependencies.implementation project
+apply plugin: 'java-platform'
+
+javaPlatform {
+    allowDependencies()
+}
+
+dependencies {
+    subprojects.forEach {
+        if (it.name != "examples") {
+            api it
         }
     }
-
 }
 
 publishing {
     publications {
         maven(MavenPublication) {
-            // Creates a pom for the base module, to automagically depend on ALL the submodules if no specific one is provided
-            pom.withXml {
-                def repo = asNode().appendNode('repositories').appendNode('repository')
-
-                repo.appendNode('name', 'anutley-maven')
-                repo.appendNode('id', 'anutley-maven')
-                repo.appendNode('url', "https://repo.anutley.me/")
-
-                def deps = asNode().appendNode('dependencies')
-                configurations.implementation.allDependencies.each {
-                    def dep = deps.appendNode('dependency')
-                    dep.appendNode('groupId', it.group)
-                    dep.appendNode('artifactId', it instanceof ProjectDependency ? it.dependencyProject.artifactId : it.name)
-                    dep.appendNode('version', it.version)
-                    dep.appendNode('scope', 'compile')
-                }
-            }
+            from components.javaPlatform
         }
     }
 }
