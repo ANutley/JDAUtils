@@ -7,7 +7,7 @@ import me.anutley.jdautils.commands.application.slash.SlashCommand;
 import me.anutley.jdautils.commands.events.*;
 import me.anutley.jdautils.commands.text.TextCommand;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.BaseGuildMessageChannel;
+import net.dv8tion.jda.api.entities.StandardGuildMessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
@@ -108,8 +108,8 @@ public class CommandListener extends ListenerAdapter {
 
         // Check whether this command is NSFW only, and if it's been run in an NSFW channel
         if (event.getCommand().getMethod().isAnnotationPresent(NSFW.class)) {
-            if (event.getMessageChannel() instanceof BaseGuildMessageChannel) {
-                if (!((BaseGuildMessageChannel) event.getMessageChannel()).isNSFW())
+            if (event.getMessageChannel() instanceof StandardGuildMessageChannel) {
+                if (!((StandardGuildMessageChannel) event.getMessageChannel()).isNSFW())
                     if (manager.getNotInNSFWChannelConsumer() != null) {
                         manager.getNotInNSFWChannelConsumer().accept(event);
                     }

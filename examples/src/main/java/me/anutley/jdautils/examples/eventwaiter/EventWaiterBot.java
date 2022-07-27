@@ -18,7 +18,7 @@ public class EventWaiterBot {
         EventWaiter waiter = new EventWaiter();
 
         JDA jda = JDABuilder.createDefault(args[0])
-                .setEnabledIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS, GatewayIntent.DIRECT_MESSAGES, GatewayIntent.GUILD_MESSAGE_REACTIONS)
+                .setEnabledIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS_AND_STICKERS, GatewayIntent.DIRECT_MESSAGES, GatewayIntent.GUILD_MESSAGE_REACTIONS)
                 .disableCache(CacheFlag.VOICE_STATE)
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .addEventListeners(waiter)

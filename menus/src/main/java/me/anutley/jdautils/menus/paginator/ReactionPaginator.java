@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
@@ -27,7 +28,7 @@ public class ReactionPaginator extends Paginator<String> {
     public void show(MessageChannel channel) {
         channel.sendMessage(getCurrent()).queue(
                 message -> {
-                    getButtons().forEach(r -> message.addReaction(r).queue());
+                    getButtons().forEach(r -> message.addReaction(Emoji.fromUnicode(r)).queue());
                     waitForClick(message);
                 }
         );
@@ -40,7 +41,7 @@ public class ReactionPaginator extends Paginator<String> {
                         .build()
         ).setEphemeral(ephemeral).queue(
                 success -> success.retrieveOriginal().queue(m -> {
-                    getButtons().forEach(r -> m.addReaction(r).queue());
+                    getButtons().forEach(r -> m.addReaction(Emoji.fromUnicode(r)).queue());
                     waitForClick(m);
                 })
         );
@@ -50,18 +51,17 @@ public class ReactionPaginator extends Paginator<String> {
         eventWaiter.wait(
                 MessageReactionAddEvent.class,
                 event -> {
-
                     event.retrieveUser().queue(user -> event.getReaction().removeReaction(user).queue(null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE)));
 
-                    if (event.getReactionEmote().getEmoji().equals(getNextButton())) {
+                    if (event.getEmoji().getName().equals(getNextButton())) {
                         message.editMessage(getNext()).queue();
-                    } else if (event.getReactionEmote().getEmoji().equals(getPrevButton()))
+                    } else if (event.getEmoji().getName().equals(getPrevButton()))
                         message.editMessage(getPrev()).queue();
 
-                    else if (event.getReactionEmote().getEmoji().equals(getStopButton()))
+                    else if (event.getEmoji().getName().equals(getStopButton()))
                         message.clearReactions().queue();
 
-                    else if (event.getReactionEmote().getEmoji().equals(getDeleteButton()))
+                    else if (event.getEmoji().getName().equals(getDeleteButton()))
                         message.delete().queue();
 
                     if (recursive) waitForClick(message);

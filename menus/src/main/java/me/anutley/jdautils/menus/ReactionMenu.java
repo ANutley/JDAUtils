@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 
@@ -32,7 +33,7 @@ public class ReactionMenu extends Menu {
     public void show(MessageChannel channel) {
         channel.sendMessage(new MessageBuilder(initialMessage).build()).queue(
                 message -> {
-                    reactions.forEach(r -> message.addReaction(r).queue());
+                    reactions.forEach(r -> message.addReaction(Emoji.fromUnicode(r)).queue());
                     waitForClick(message.getIdLong());
                 }
         );
@@ -45,7 +46,7 @@ public class ReactionMenu extends Menu {
                         .build()
         ).setEphemeral(ephemeral).queue(
                 success -> success.retrieveOriginal().queue(m -> {
-                    reactions.forEach(r -> m.addReaction(r).queue());
+                    reactions.forEach(r -> m.addReaction(Emoji.fromUnicode(r)).queue());
                     waitForClick(m.getIdLong());
                 })
         );

@@ -15,7 +15,7 @@ public class HelpBot {
 
     public static void main(String[] args) throws LoginException, InterruptedException {
         JDA jda = JDABuilder.createDefault(args[0])
-                .setEnabledIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS, GatewayIntent.DIRECT_MESSAGES)
+                .setEnabledIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS_AND_STICKERS, GatewayIntent.DIRECT_MESSAGES)
                 .disableCache(CacheFlag.VOICE_STATE)
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .build();
