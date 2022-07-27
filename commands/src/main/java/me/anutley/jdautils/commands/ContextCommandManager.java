@@ -107,7 +107,7 @@ public class ContextCommandManager {
          * @param commandManager The base command manager
          * @return The built command manager
          */
-        public ContextCommandManager build(CommandManager commandManager) {
+        protected ContextCommandManager build(CommandManager commandManager) {
 
             List<Command<?, ?>> genericMessageContextCommands = new ArrayList<>(commandManager.getCommandsByType(JDAMessageContextCommand.class));
 

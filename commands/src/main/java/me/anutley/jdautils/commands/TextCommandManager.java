@@ -201,11 +201,11 @@ public class TextCommandManager {
             return this;
         }
 
-        public TextCommandManager build(CommandManager commandManager) {
+        protected TextCommandManager build(CommandManager commandManager) {
             List<Command<?, ?>> commands = new ArrayList<>(commandManager.getCommandsByType(JDATextCommand.class));
             List<TextCommand> textCommands = new ArrayList<TextCommand>() {{
-               for (Command<?, ?> command : commands)
-                   add((TextCommand) command);
+                for (Command<?, ?> command : commands)
+                    add((TextCommand) command);
             }};
 
 

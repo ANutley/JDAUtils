@@ -60,6 +60,7 @@ public class SlashCommandManager {
             String guildId = null;
 
             for (SlashCommand slashCommand : SlashCommand.getCommandsFromBase(commands, base)) { // Get all the slash command that are registered with the specific base
+
                 if (slashCommand.getMethod().isAnnotationPresent(GuildCommand.class))
                     // If it's a guild command, set the guild id, so we can register it guild-wide instead of globally
                     guildId = slashCommand.getMethod().getAnnotation(GuildCommand.class).value();
@@ -159,7 +160,7 @@ public class SlashCommandManager {
          * @param commandManager The base command manager
          * @return The built command manager
          */
-        public SlashCommandManager build(CommandManager commandManager) {
+        protected SlashCommandManager build(CommandManager commandManager) {
             List<me.anutley.jdautils.commands.Command<?, ?>> commands = new ArrayList<>(commandManager.getCommandsByType(JDASlashCommand.class));
 
             List<SlashCommand> slashCommands = new ArrayList<SlashCommand>() {{
