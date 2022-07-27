@@ -74,6 +74,12 @@ public class ReactionMenu extends Menu {
 
         @Override
         public ReactionMenu build() {
+
+            if (eventWaiter == null) throw new IllegalStateException("The Event Waiter must be set!");
+            if (reactions.size() == 0) throw new IllegalStateException("There must be at least one reaction");
+            if (action == null) throw new IllegalStateException("There must be a callback action");
+            if (initialMessage == null) throw new IllegalStateException("There must be an initial message");
+
             return new ReactionMenu(
                     super.eventWaiter,
                     super.allowedUsers,

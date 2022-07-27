@@ -75,7 +75,7 @@ public class ButtonMenu extends Menu {
         public ButtonMenu build() {
 
             if (eventWaiter == null) throw new IllegalStateException("The Event Waiter must be set!");
-            if (actionRows.size() == 0) throw new IllegalStateException("There must be at least one page");
+            if (actionRows.size() == 0) throw new IllegalStateException("There must be at least one action row");
             if (action == null) throw new IllegalStateException("There must be a callback action");
             if (initialMessage == null) throw new IllegalStateException("There must be an initial message");
 
