@@ -51,7 +51,7 @@ public class ReactionPaginator extends Paginator<String> {
                 MessageReactionAddEvent.class,
                 event -> {
 
-                    event.getReaction().removeReaction(event.getUser()).queue(null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
+                    event.retrieveUser().queue(user -> event.getReaction().removeReaction(user).queue(null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE)));
 
                     if (event.getReactionEmote().getEmoji().equals(getNextButton())) {
                         message.editMessage(getNext()).queue();
@@ -67,7 +67,7 @@ public class ReactionPaginator extends Paginator<String> {
                     if (recursive) waitForClick(message);
 
                 },
-                event -> isAllowed(event.getUser(), event.getGuild()) && event.getMessageIdLong() == message.getIdLong(),
+                event -> isAllowed(event.retrieveUser().complete(), event.getGuild()) && event.getMessageIdLong() == message.getIdLong(),
                 getTimeRemainingInMs(),
                 TimeUnit.MILLISECONDS,
                 null

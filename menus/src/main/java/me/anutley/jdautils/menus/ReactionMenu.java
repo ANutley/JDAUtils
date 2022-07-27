@@ -55,11 +55,11 @@ public class ReactionMenu extends Menu {
         eventWaiter.wait(
                 MessageReactionAddEvent.class,
                 event -> {
-                    event.getReaction().removeReaction(event.getUser()).queue();
+                    event.retrieveUser().queue(user -> event.getReaction().removeReaction(user).queue());
                     action.accept(event);
                     if (recursive) waitForClick(messageId);
                 },
-                event -> isAllowed(event.getUser(), event.getGuild()) && event.getMessageIdLong() == messageId,
+                event -> isAllowed(event.retrieveUser().complete(), event.getGuild()) && event.getMessageIdLong() == messageId,
                 getTimeRemainingInMs(),
                 TimeUnit.MILLISECONDS,
                 null
