@@ -19,6 +19,8 @@ public @interface JDAUserContextCommand {
     String name();
 
     /**
+     * This is not provided to Discord (as context commands do not have a description), but this can be used internally, for example in a help command
+     *
      * @return the description of the command
      */
     String description() default "";
@@ -35,6 +37,7 @@ public @interface JDAUserContextCommand {
 
     /**
      * This can be used to set meta information that isn't provided by default. For example a meta key "platform" with the value of "discord" or "minecraft".
+     *
      * @return An array of {@link CommandMeta}
      */
     CommandMeta[] meta() default {};

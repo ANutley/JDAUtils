@@ -1,9 +1,11 @@
 package me.anutley.jdautils.commands.events;
 
 import me.anutley.jdautils.commands.Command;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.GenericEvent;
-import net.dv8tion.jda.api.interactions.Interaction;
 import net.dv8tion.jda.api.interactions.commands.CommandInteraction;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,7 +58,7 @@ public abstract class CommandEvent<E extends GenericEvent, C extends Command<?, 
     public abstract @Nullable Guild getGuild();
 
     /**
-     * @return The message channel in which this command was ran
+     * @return The message channel in which this command was run
      */
     public abstract MessageChannel getMessageChannel();
 

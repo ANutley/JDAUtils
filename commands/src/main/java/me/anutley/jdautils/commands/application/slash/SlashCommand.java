@@ -145,6 +145,7 @@ public class SlashCommand extends Command<JDASlashCommand, SlashCommandEvent> {
     /**
      * This method returns the commands from the base, almost the opposite of {@link SlashCommand#getAllBaseCommands(List)}
      * It will return the {@link SlashCommand}'s which has the base command given
+     *
      * @param commands - The commands to search through
      * @param base     - The base that you want to search for
      * @return - A list of slash commands from the specific base command

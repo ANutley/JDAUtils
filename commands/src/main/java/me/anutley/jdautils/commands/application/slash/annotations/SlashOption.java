@@ -14,11 +14,15 @@ import java.lang.annotation.RetentionPolicy;
 public @interface SlashOption {
 
     /**
+     * 1-32 characters
+     *
      * @return the name of the option
      */
     String name();
 
     /**
+     * 1-100 characters
+     *
      * @return the description of the option
      */
     String description();

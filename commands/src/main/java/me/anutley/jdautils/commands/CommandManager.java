@@ -374,7 +374,7 @@ public class CommandManager {
         }
 
         /**
-         * This consumer's requirements are determined by using one of the Require... annotations. For example {@link RequireRole}
+         * This consumer's requirements are determined by using one of the @Require... annotations. For example {@link RequireRole}
          * You run specific actions depending on the requirement which failed. For example:
          * <code>
          * <pre>

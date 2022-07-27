@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+/**
+ * This is a manager for various <em> text based command</em> settings. Although JDAUtils does provide functionality for text based commands, slash commands are recommended to be used instead
+ */
 public class TextCommandManager {
 
     private final CommandManager commandManager;
@@ -51,7 +54,7 @@ public class TextCommandManager {
     }
 
     /**
-     * @return The default prefix
+     * @return The default text-based command prefix
      */
     public String getDefaultPrefix() {
         return defaultPrefix;
@@ -132,12 +135,20 @@ public class TextCommandManager {
         private boolean allowMentionAsPrefix = false;
 
 
+        /**
+         * Please keep in mind, this prefix is volatile, and do need to be re-set after a bot restart
+         *
+         * @param defaultPrefix the default prefix which is used for text based commands
+         * @return itself for chaining convenience
+         */
         public Builder setDefaultPrefix(String defaultPrefix) {
             this.defaultPrefix = defaultPrefix;
             return this;
         }
 
         /**
+         * Please keep in mind, these prefixes are volatile, and do need to be re-set after a bot restart
+         *
          * @param guildId the id of the guild to set the prefix in
          * @param prefix  the new prefix the guild should have
          * @return itself for chaining convenience
@@ -149,6 +160,8 @@ public class TextCommandManager {
         }
 
         /**
+         * Please keep in mind, these prefixes are volatile, and do need to be re-set after a bot restart
+         *
          * @param guild  the guild to set the prefix in
          * @param prefix the new prefix the guild should have
          * @return itself for chaining convenience
@@ -158,16 +171,31 @@ public class TextCommandManager {
             return this;
         }
 
+        /**
+         * Please be warned, this will <em>override</em> all of your old guild prefixes
+         * Also, please keep in mind, these prefixes are volatile, and do need to be re-set after a bot restart
+         *
+         * @param guildPrefixes the map of guild prefixes to set
+         * @return itself for chaining convenience
+         */
         public Builder setGuildPrefixes(Map<String, String> guildPrefixes) {
             this.guildPrefixes = guildPrefixes;
             return this;
         }
 
+        /**
+         * @param noCommandFoundConsumer the consumer which will be accepted if no command is found with the name that was inputted
+         * @return itself for chaining convenience
+         */
         public Builder setNoCommandFoundConsumer(Consumer<MessageReceivedEvent> noCommandFoundConsumer) {
             this.noCommandFoundConsumer = noCommandFoundConsumer;
             return this;
         }
 
+        /**
+         * @param allowMentionAsPrefix whether mentions can be used instead of prefixes
+         * @return itself for chaining convenience
+         */
         public Builder setAllowMentionAsPrefix(boolean allowMentionAsPrefix) {
             this.allowMentionAsPrefix = allowMentionAsPrefix;
             return this;

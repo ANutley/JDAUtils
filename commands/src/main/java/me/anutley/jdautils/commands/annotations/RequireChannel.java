@@ -10,7 +10,7 @@ import java.lang.annotation.RetentionPolicy;
 public @interface RequireChannel {
 
     /**
-     * @return The id(s) of the channel(s) which the command has to be ran in
+     * @return The id(s) of the channel(s) which the command has to be run in
      */
     String[] value();
 

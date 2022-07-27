@@ -52,22 +52,30 @@ public abstract class Command<A extends Annotation, E extends CommandEvent<?, ?>
     }
 
     /**
+     * E.G. "ban"
+     *
      * @return The name of the command
      */
     public abstract String getName();
 
     /**
+     * E.G. "This command bans members from your guild"
+     *
      * @return The description of the command
      */
     public abstract String getDescription();
 
     /**
+     * E.G. "moderation"
+     *
      * @return The category of the command
      */
     public abstract String getCategory();
 
     /**
-     * @return The usage of the command
+     * E.G. "/ban @user"
+     *
+     * @return The usage example of the command
      */
     public abstract String getUsage();
 

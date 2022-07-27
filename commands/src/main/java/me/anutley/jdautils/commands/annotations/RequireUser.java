@@ -10,7 +10,7 @@ import java.lang.annotation.RetentionPolicy;
 public @interface RequireUser {
 
     /**
-     * @return The id(s) of the user(s) which are required to run this command
+     * @return The list of ids that must contain the id of the user attempting to run the command to give them permission to run it
      */
     String[] value();
 }

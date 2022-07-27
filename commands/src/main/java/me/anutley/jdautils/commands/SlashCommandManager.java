@@ -86,7 +86,7 @@ public class SlashCommandManager {
                     if (option.getOption().type().equals(OptionType.CHANNEL))
                         if (option.getOption().channelTypes().length != 0)
                             optionData.setChannelTypes(Arrays.stream(option.getOption().channelTypes())
-                                    .filter(channelType -> channelType != ChannelType.UNKNOWN) // Filter out the ones which are default
+                                    .filter(channelType -> channelType != ChannelType.UNKNOWN) // Filter out the ones which don't ask for a specific channel type
                                     .collect(Collectors.toList()));
 
                     optionList.add(optionData);
