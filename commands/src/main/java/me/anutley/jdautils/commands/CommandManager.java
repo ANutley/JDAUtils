@@ -269,7 +269,6 @@ public class CommandManager {
 
         // Group the commands by guild ids to add all the guild commands to each guild in one go
         for (Map.Entry<String, List<CommandData>> entry : ApplicationCommandData.sortByGuildId(guildCommands).entrySet()) {
-            entry.getValue().forEach(commandData -> System.out.println(commandData.getName()));
 
             // Get either the jda instance or the shard manager depending on what they initialised the command manager with.
             Guild guild = getJda() == null ? getShardManager().getGuildById(entry.getKey()) : getJda().getGuildById(entry.getKey());
