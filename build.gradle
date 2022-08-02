@@ -1,4 +1,5 @@
 allprojects {
+    apply plugin: 'java'
     apply plugin: 'maven-publish'
 
     group 'me.anutley'
@@ -61,27 +62,35 @@ subprojects {
                 }
             }
         }
-    }
-}
 
-apply plugin: 'java-platform'
-
-javaPlatform {
-    allowDependencies()
-}
-
-dependencies {
-    subprojects.forEach {
-        if (it.name != "examples") {
-            api it
+        afterEvaluate {
+            rootProject.dependencies.implementation project
         }
     }
+
 }
+
 
 publishing {
     publications {
         maven(MavenPublication) {
-            from components.javaPlatform
+            // Creates a pom for the base module, to automagically depend on ALL the submodules if no specific one is provided
+            pom.withXml {
+                def repo = asNode().appendNode('repositories').appendNode('repository')
+
+                repo.appendNode('name', 'anutley-maven')
+                repo.appendNode('id', 'anutley-maven')
+                repo.appendNode('url', "https://repo.anutley.me/")
+
+                def deps = asNode().appendNode('dependencies')
+                configurations.implementation.allDependencies.each {
+                    def dep = deps.appendNode('dependency')
+                    dep.appendNode('groupId', it.group)
+                    dep.appendNode('artifactId', it instanceof ProjectDependency ? it.dependencyProject.artifactId : it.name)
+                    dep.appendNode('version', it.version)
+                    dep.appendNode('scope', 'compile')
+                }
+            }
         }
     }
 }
