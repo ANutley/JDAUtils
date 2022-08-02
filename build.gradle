@@ -3,7 +3,7 @@ allprojects {
     apply plugin: 'maven-publish'
 
     group 'me.anutley'
-    version '1.1'
+    version '1.2-SNAPSHOT'
 
     ext {
         dependencies {
