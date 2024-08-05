@@ -1,16 +1,19 @@
 package me.anutley.jdautils.menus.paginator;
 
 import me.anutley.jdautils.eventwaiter.EventWaiter;
-import net.dv8tion.jda.api.MessageBuilder;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.requests.ErrorResponse;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
+import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -20,13 +23,13 @@ import java.util.concurrent.TimeUnit;
  */
 public class ButtonPaginator extends Paginator<Button> {
 
-    public ButtonPaginator(EventWaiter eventWaiter, List<User> allowedUsers, List<Role> allowedRoles, long timeout, TimeUnit units, boolean recursive, boolean ephemeral, List<Message> pages) {
+    public ButtonPaginator(EventWaiter eventWaiter, List<User> allowedUsers, List<Role> allowedRoles, long timeout, TimeUnit units, boolean recursive, boolean ephemeral, List<MessageCreateData> pages) {
         super(eventWaiter, allowedUsers, allowedRoles, timeout, units, recursive, ephemeral, pages);
     }
 
     @Override
     public void show(MessageChannel channel) {
-        channel.sendMessage(getCurrent()).setActionRows(ActionRow.of(getButtons())).queue(
+        channel.sendMessage(getCurrent()).setComponents(ActionRow.of(getButtons())).queue(
                 message -> waitForClick(message.getIdLong())
         );
     }
@@ -35,8 +38,8 @@ public class ButtonPaginator extends Paginator<Button> {
     @Override
     public void show(GenericCommandInteractionEvent event) {
         event.reply(
-                new MessageBuilder(getCurrent())
-                        .setActionRows(ActionRow.of(getButtons()))
+                MessageCreateBuilder.from(getCurrent())
+                        .setComponents(ActionRow.of(getButtons()))
                         .build()
         ).setEphemeral(ephemeral).queue(
                 success -> success.retrieveOriginal().queue(m -> waitForClick(m.getIdLong()))
@@ -51,19 +54,19 @@ public class ButtonPaginator extends Paginator<Button> {
                     event.deferEdit().queue();
 
                     if (event.getButton().equals(getNextButton())) {
-                        event.getInteraction().getHook().editOriginal(getNext())
-                                .setActionRows(ActionRow.of(getButtons()))
+                        event.getInteraction().getHook().editOriginal(MessageEditData.fromCreateData(getNext()))
+                                .setComponents(ActionRow.of(getButtons()))
                                 .queue();
                     } else if (event.getButton().equals(getPrevButton()))
-                        event.getInteraction().getHook().editOriginal(getPrev())
-                                .setActionRows(ActionRow.of(getButtons()))
+                        event.getInteraction().getHook().editOriginal(MessageEditData.fromCreateData(getPrev()))
+                                .setComponents(ActionRow.of(getButtons()))
                                 .queue();
 
                     else if (event.getButton().equals(getStopButton()))
-                        event.getInteraction().getMessage().editMessage(getCurrent()).override(true).queue();
+                        event.getInteraction().getMessage().editMessage(MessageEditData.fromCreateData(getCurrent())).queue();
 
                     if (event.getButton().equals(getDeleteButton()))
-                        event.getMessage().delete().queue();
+                        event.getMessage().delete().queue(null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
 
                     if (recursive) waitForClick(messageId);
                 },

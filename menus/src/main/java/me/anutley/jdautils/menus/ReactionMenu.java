@@ -1,14 +1,14 @@
 package me.anutley.jdautils.menus;
 
 import me.anutley.jdautils.eventwaiter.EventWaiter;
-import net.dv8tion.jda.api.MessageBuilder;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,11 +18,11 @@ import java.util.function.Consumer;
 
 public class ReactionMenu extends Menu {
 
-    protected final Message initialMessage;
+    protected final MessageCreateData initialMessage;
     protected final Consumer<MessageReactionAddEvent> action;
     protected final List<String> reactions;
 
-    public ReactionMenu(EventWaiter eventWaiter, List<User> allowedUsers, List<Role> allowedRoles, long timeout, TimeUnit units, boolean recursive, boolean ephemeral, Message initialMessage, Consumer<MessageReactionAddEvent> action, List<String> reactions) {
+    public ReactionMenu(EventWaiter eventWaiter, List<User> allowedUsers, List<Role> allowedRoles, long timeout, TimeUnit units, boolean recursive, boolean ephemeral, MessageCreateData initialMessage, Consumer<MessageReactionAddEvent> action, List<String> reactions) {
         super(eventWaiter, allowedUsers, allowedRoles, timeout, units, recursive, ephemeral);
         this.initialMessage = initialMessage;
         this.action = action;
@@ -31,7 +31,7 @@ public class ReactionMenu extends Menu {
 
     @Override
     public void show(MessageChannel channel) {
-        channel.sendMessage(new MessageBuilder(initialMessage).build()).queue(
+        channel.sendMessage(MessageCreateBuilder.from(initialMessage).build()).queue(
                 message -> {
                     reactions.forEach(r -> message.addReaction(Emoji.fromUnicode(r)).queue());
                     waitForClick(message.getIdLong());
@@ -42,7 +42,7 @@ public class ReactionMenu extends Menu {
     @Override
     public void show(GenericCommandInteractionEvent event) {
         event.reply(
-                new MessageBuilder((initialMessage))
+                MessageCreateBuilder.from((initialMessage))
                         .build()
         ).setEphemeral(ephemeral).queue(
                 success -> success.retrieveOriginal().queue(m -> {
@@ -69,7 +69,7 @@ public class ReactionMenu extends Menu {
 
     public static class Builder extends Menu.Builder<ReactionMenu.Builder, ReactionMenu> {
 
-        protected Message initialMessage = null;
+        protected MessageCreateData initialMessage = null;
         protected Consumer<MessageReactionAddEvent> action = null;
         protected List<String> reactions = new ArrayList<>();
 
@@ -99,7 +99,7 @@ public class ReactionMenu extends Menu {
          * @param initialMessage Sets the initial message that should be sent with the components
          * @return Itself for chaining convenience
          */
-        public Builder setInitialMessage(Message initialMessage) {
+        public Builder setInitialMessage(MessageCreateData initialMessage) {
             this.initialMessage = initialMessage;
             return this;
         }

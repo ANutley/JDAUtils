@@ -1,14 +1,14 @@
 package me.anutley.jdautils.menus;
 
 import me.anutley.jdautils.eventwaiter.EventWaiter;
-import net.dv8tion.jda.api.MessageBuilder;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,14 +16,14 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-public class SelectionMenu extends Menu {
+// TODO implement other types of select menu or make this generic
+public class StringSelectionMenu extends Menu {
 
-
-    protected final Message initialMessage;
-    protected final Consumer<SelectMenuInteractionEvent> action;
+    protected final MessageCreateData initialMessage;
+    protected final Consumer<StringSelectInteractionEvent> action;
     protected final List<ActionRow> actionRows;
 
-    public SelectionMenu(EventWaiter eventWaiter, List<User> allowedUsers, List<Role> allowedRoles, long timeout, TimeUnit units, boolean recursive, boolean ephemeral, Message initialMessage, Consumer<SelectMenuInteractionEvent> action, List<ActionRow> actionRows) {
+    public StringSelectionMenu(EventWaiter eventWaiter, List<User> allowedUsers, List<Role> allowedRoles, long timeout, TimeUnit units, boolean recursive, boolean ephemeral, MessageCreateData initialMessage, Consumer<StringSelectInteractionEvent> action, List<ActionRow> actionRows) {
         super(eventWaiter, allowedUsers, allowedRoles, timeout, units, recursive, ephemeral);
         this.initialMessage = initialMessage;
         this.action = action;
@@ -32,8 +32,8 @@ public class SelectionMenu extends Menu {
 
     @Override
     public void show(MessageChannel channel) {
-        MessageBuilder builder = new MessageBuilder(initialMessage)
-                .setActionRows(actionRows);
+        MessageCreateBuilder builder = MessageCreateBuilder.from(initialMessage)
+                .setComponents(actionRows);
         channel.sendMessage(builder.build()).queue(
                 success -> waitForClick(success.getIdLong())
         );
@@ -42,8 +42,8 @@ public class SelectionMenu extends Menu {
     @Override
     public void show(GenericCommandInteractionEvent event) {
         event.reply(
-                new MessageBuilder(initialMessage)
-                        .setActionRows(actionRows)
+                MessageCreateBuilder.from(initialMessage)
+                        .setComponents(actionRows)
                         .build()
         ).setEphemeral(ephemeral).queue(
                 success -> success.retrieveOriginal().queue(m -> waitForClick(m.getIdLong()))
@@ -52,7 +52,7 @@ public class SelectionMenu extends Menu {
 
     private void waitForClick(long messageId) {
         eventWaiter.wait(
-                SelectMenuInteractionEvent.class,
+                StringSelectInteractionEvent.class,
                 event -> {
                     action.accept(event);
                     if (recursive) waitForClick(messageId);
@@ -64,21 +64,21 @@ public class SelectionMenu extends Menu {
         );
     }
 
-    public static class Builder extends Menu.Builder<SelectionMenu.Builder, SelectionMenu> {
+    public static class Builder extends Menu.Builder<StringSelectionMenu.Builder, StringSelectionMenu> {
 
-        protected Message initialMessage = null;
-        protected Consumer<SelectMenuInteractionEvent> action = null;
+        protected MessageCreateData initialMessage = null;
+        protected Consumer<StringSelectInteractionEvent> action = null;
         protected List<ActionRow> actionRows = new ArrayList<>();
 
         @Override
-        public SelectionMenu build() {
+        public StringSelectionMenu build() {
 
             if (eventWaiter == null) throw new IllegalStateException("The Event Waiter must be set!");
             if (actionRows.size() == 0) throw new IllegalStateException("There must be at least one action row");
             if (action == null) throw new IllegalStateException("There must be a callback action");
             if (initialMessage == null) throw new IllegalStateException("There must be an initial message");
 
-            return new SelectionMenu(
+            return new StringSelectionMenu(
                     super.eventWaiter,
                     super.allowedUsers,
                     super.allowedRoles,
@@ -96,7 +96,7 @@ public class SelectionMenu extends Menu {
          * @param initialMessage Sets the initial message that should be sent with the components
          * @return Itself for chaining convenience
          */
-        public SelectionMenu.Builder setInitialMessage(Message initialMessage) {
+        public StringSelectionMenu.Builder setInitialMessage(MessageCreateData initialMessage) {
             this.initialMessage = initialMessage;
             return this;
         }
@@ -105,7 +105,7 @@ public class SelectionMenu extends Menu {
          * @param action The consumer that will be accepted after a button is clicked
          * @return Itself for chaining convenience
          */
-        public SelectionMenu.Builder setAction(Consumer<SelectMenuInteractionEvent> action) {
+        public StringSelectionMenu.Builder setAction(Consumer<StringSelectInteractionEvent> action) {
             this.action = action;
             return this;
         }

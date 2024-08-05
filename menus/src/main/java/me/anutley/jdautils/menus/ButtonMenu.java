@@ -1,14 +1,14 @@
 package me.anutley.jdautils.menus;
 
 import me.anutley.jdautils.eventwaiter.EventWaiter;
-import net.dv8tion.jda.api.MessageBuilder;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,11 +18,11 @@ import java.util.function.Consumer;
 
 public class ButtonMenu extends Menu {
 
-    protected final Message initialMessage;
+    protected final MessageCreateData initialMessage;
     protected final Consumer<ButtonInteractionEvent> action;
     protected final List<ActionRow> actionRows;
 
-    public ButtonMenu(EventWaiter eventWaiter, List<User> allowedUsers, List<Role> allowedRoles, long timeout, TimeUnit units, boolean recursive, boolean ephemeral, Message initialMessage, Consumer<ButtonInteractionEvent> action, List<ActionRow> actionRows) {
+    public ButtonMenu(EventWaiter eventWaiter, List<User> allowedUsers, List<Role> allowedRoles, long timeout, TimeUnit units, boolean recursive, boolean ephemeral, MessageCreateData initialMessage, Consumer<ButtonInteractionEvent> action, List<ActionRow> actionRows) {
         super(eventWaiter, allowedUsers, allowedRoles, timeout, units, recursive, ephemeral);
         this.initialMessage = initialMessage;
         this.action = action;
@@ -32,8 +32,8 @@ public class ButtonMenu extends Menu {
     @Override
     public void show(MessageChannel channel) {
         channel.sendMessage(
-                new MessageBuilder(initialMessage)
-                        .setActionRows(actionRows)
+                MessageCreateBuilder.from(initialMessage)
+                        .setComponents(actionRows)
                         .build()
         ).queue(
                 success -> waitForClick(success.getIdLong())
@@ -43,8 +43,8 @@ public class ButtonMenu extends Menu {
     @Override
     public void show(GenericCommandInteractionEvent event) {
         event.reply(
-                new MessageBuilder(initialMessage)
-                        .setActionRows(actionRows)
+                MessageCreateBuilder.from(initialMessage)
+                        .setComponents(actionRows)
                         .build()
         ).setEphemeral(ephemeral).queue(
                 success -> success.retrieveOriginal().queue(m -> waitForClick(m.getIdLong()))
@@ -67,7 +67,7 @@ public class ButtonMenu extends Menu {
 
     public static class Builder extends Menu.Builder<Builder, ButtonMenu> {
 
-        protected Message initialMessage = null;
+        protected MessageCreateData initialMessage = null;
         protected Consumer<ButtonInteractionEvent> action = null;
         protected List<ActionRow> actionRows = new ArrayList<>();
 
@@ -75,7 +75,7 @@ public class ButtonMenu extends Menu {
         public ButtonMenu build() {
 
             if (eventWaiter == null) throw new IllegalStateException("The Event Waiter must be set!");
-            if (actionRows.size() == 0) throw new IllegalStateException("There must be at least one action row");
+            if (actionRows.isEmpty()) throw new IllegalStateException("There must be at least one action row");
             if (action == null) throw new IllegalStateException("There must be a callback action");
             if (initialMessage == null) throw new IllegalStateException("There must be an initial message");
 
@@ -97,7 +97,7 @@ public class ButtonMenu extends Menu {
          * @param initialMessage Sets the initial message that should be sent with the components
          * @return Itself for chaining convenience
          */
-        public Builder setInitialMessage(Message initialMessage) {
+        public Builder setInitialMessage(MessageCreateData initialMessage) {
             this.initialMessage = initialMessage;
             return this;
         }

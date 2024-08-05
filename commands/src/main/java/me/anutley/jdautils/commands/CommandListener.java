@@ -7,7 +7,7 @@ import me.anutley.jdautils.commands.application.slash.SlashCommand;
 import me.anutley.jdautils.commands.events.*;
 import me.anutley.jdautils.commands.text.TextCommand;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.StandardGuildMessageChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;

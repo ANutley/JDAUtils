@@ -18,7 +18,7 @@ public class MenuBot {
         JDA jda = JDABuilder.createDefault(args[0])
                 .setEnabledIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS_AND_STICKERS, GatewayIntent.DIRECT_MESSAGES, GatewayIntent.GUILD_MESSAGE_REACTIONS)
                 .addEventListeners(waiter)
-                .disableCache(CacheFlag.VOICE_STATE)
+                .disableCache(CacheFlag.VOICE_STATE, CacheFlag.SCHEDULED_EVENTS)
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .build();
 

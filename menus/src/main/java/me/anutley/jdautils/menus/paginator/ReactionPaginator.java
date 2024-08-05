@@ -1,9 +1,8 @@
 package me.anutley.jdautils.menus.paginator;
 
 import me.anutley.jdautils.eventwaiter.EventWaiter;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -11,6 +10,9 @@ import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionE
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.requests.ErrorResponse;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
+import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -20,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class ReactionPaginator extends Paginator<String> {
 
-    public ReactionPaginator(EventWaiter eventWaiter, List<User> allowedUsers, List<Role> allowedRoles, long timeout, TimeUnit units, boolean recursive, boolean ephemeral, List<Message> pages) {
+    public ReactionPaginator(EventWaiter eventWaiter, List<User> allowedUsers, List<Role> allowedRoles, long timeout, TimeUnit units, boolean recursive, boolean ephemeral, List<MessageCreateData> pages) {
         super(eventWaiter, allowedUsers, allowedRoles, timeout, units, recursive, ephemeral, pages);
     }
 
@@ -37,7 +39,7 @@ public class ReactionPaginator extends Paginator<String> {
     @Override
     public void show(GenericCommandInteractionEvent event) {
         event.reply(
-                new MessageBuilder(getCurrent())
+                MessageCreateBuilder.from(getCurrent())
                         .build()
         ).setEphemeral(ephemeral).queue(
                 success -> success.retrieveOriginal().queue(m -> {
@@ -54,15 +56,15 @@ public class ReactionPaginator extends Paginator<String> {
                     event.retrieveUser().queue(user -> event.getReaction().removeReaction(user).queue(null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE)));
 
                     if (event.getEmoji().getName().equals(getNextButton())) {
-                        message.editMessage(getNext()).queue();
+                        message.editMessage(MessageEditData.fromCreateData(getNext())).queue();
                     } else if (event.getEmoji().getName().equals(getPrevButton()))
-                        message.editMessage(getPrev()).queue();
+                        message.editMessage(MessageEditData.fromCreateData(getPrev())).queue();
 
                     else if (event.getEmoji().getName().equals(getStopButton()))
                         message.clearReactions().queue();
 
                     else if (event.getEmoji().getName().equals(getDeleteButton()))
-                        message.delete().queue();
+                            message.delete().queue(null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
 
                     if (recursive) waitForClick(message);
 

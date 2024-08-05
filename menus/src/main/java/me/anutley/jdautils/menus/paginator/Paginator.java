@@ -2,12 +2,12 @@ package me.anutley.jdautils.menus.paginator;
 
 import me.anutley.jdautils.eventwaiter.EventWaiter;
 import me.anutley.jdautils.menus.Menu;
-import net.dv8tion.jda.api.MessageBuilder;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class Paginator<T> extends Menu {
 
-    protected List<Message> pages;
+    protected List<MessageCreateData> pages;
     protected int index = 0;
 
     /**
@@ -35,7 +35,7 @@ public abstract class Paginator<T> extends Menu {
      * @param ephemeral    Whether menus that reply to interactions should be ephemeral
      * @param pages        A list of Message's which the paginator should use for its content
      */
-    public Paginator(EventWaiter eventWaiter, List<User> allowedUsers, List<Role> allowedRoles, long timeout, TimeUnit units, boolean recursive, boolean ephemeral, List<Message> pages) {
+    public Paginator(EventWaiter eventWaiter, List<User> allowedUsers, List<Role> allowedRoles, long timeout, TimeUnit units, boolean recursive, boolean ephemeral, List<MessageCreateData> pages) {
         super(eventWaiter, allowedUsers, allowedRoles, timeout, units, recursive, ephemeral);
         this.pages = pages;
     }
@@ -76,21 +76,21 @@ public abstract class Paginator<T> extends Menu {
     /**
      * @return The next page in the paginator
      */
-    public Message getNext() {
+    public MessageCreateData getNext() {
         return isEnd() ? pages.get(index) : pages.get(++index);
     }
 
     /**
      * @return The previous page in the paginator
      */
-    public Message getPrev() {
+    public MessageCreateData getPrev() {
         return isStart() ? pages.get(0) : pages.get(--index);
     }
 
     /**
      * @return The current page in the paginator
      */
-    public Message getCurrent() {
+    public MessageCreateData getCurrent() {
         return pages.get(index);
     }
 
@@ -118,36 +118,36 @@ public abstract class Paginator<T> extends Menu {
     @SuppressWarnings("unchecked")
     public static abstract class Builder<B extends Paginator.Builder<B, M>, M extends Paginator<?>> extends Menu.Builder<B, M> {
 
-        protected final List<Message> pages = new ArrayList<>();
+        protected final List<MessageCreateData> pages = new ArrayList<>();
 
         /**
-         * @param message The {@link Message} to add to the paginator
+         * @param message The {@link MessageCreateData} to add to the paginator
          * @return Itself for chaining convenience
          */
-        public B addPage(Message message) {
+        public B addPage(MessageCreateData message) {
             this.pages.add(message);
             return (B) this;
         }
 
         /**
-         * Takes the provided content, builds an {@link Message} and adds it to the paginator
+         * Takes the provided content, builds an {@link MessageCreateData} and adds it to the paginator
          *
          * @param messageContent The content of the message you want to add
          * @return Itself for chaining convenience
          */
         public B addPage(String messageContent) {
-            this.pages.add(new MessageBuilder(messageContent).build());
+            this.pages.add(new MessageCreateBuilder().addContent(messageContent).build());
             return (B) this;
         }
 
         /**
-         * Takes the provided embed, builds an {@link Message} and adds it to the paginator
+         * Takes the provided embed, builds an {@link MessageCreateData} and adds it to the paginator
          *
          * @param messageEmbed The {@link MessageEmbed} you want to add
          * @return Itself for chaining convenience
          */
         public B addPage(MessageEmbed messageEmbed) {
-            this.pages.add(new MessageBuilder(messageEmbed).build());
+            this.pages.add(new MessageCreateBuilder().addEmbeds(messageEmbed).build());
             return (B) this;
         }
 

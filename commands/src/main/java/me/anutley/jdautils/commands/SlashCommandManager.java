@@ -5,7 +5,7 @@ import me.anutley.jdautils.commands.application.annotations.GuildCommand;
 import me.anutley.jdautils.commands.application.slash.SlashCommand;
 import me.anutley.jdautils.commands.application.slash.SlashCommandOption;
 import me.anutley.jdautils.commands.application.slash.annotations.JDASlashCommand;
-import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -148,7 +148,7 @@ public class SlashCommandManager {
      */
     public SlashCommand getCommandFromEvent(SlashCommandInteractionEvent event) {
 
-        return this.commands.stream().filter(slashCommand -> slashCommand.getAnnotation().name().equals(event.getCommandPath()))
+        return this.commands.stream().filter(slashCommand -> slashCommand.getAnnotation().name().equals(event.getFullCommandName()))
                 .findFirst()
                 .orElse(null);
     }
