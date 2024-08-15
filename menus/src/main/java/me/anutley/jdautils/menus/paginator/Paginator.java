@@ -108,6 +108,13 @@ public abstract class Paginator<T> extends Menu {
         return index == pages.size() - 1;
     }
 
+    /**
+     * @return The list of pages in the paginator
+     */
+    public List<MessageCreateData> getPages() {
+        return pages;
+    }
+
 
     /**
      * A common builder for paginators
