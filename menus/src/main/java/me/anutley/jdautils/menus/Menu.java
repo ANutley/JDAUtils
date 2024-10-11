@@ -1,11 +1,10 @@
 package me.anutley.jdautils.menus;
 
 import me.anutley.jdautils.eventwaiter.EventWaiter;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -24,6 +23,7 @@ public abstract class Menu {
     protected final TimeUnit units;
     protected final boolean recursive;
     protected final boolean ephemeral;
+    protected final MessageCreateData initialMessage;
 
     private final long startTimestamp = System.currentTimeMillis();
 
@@ -35,8 +35,9 @@ public abstract class Menu {
      * @param units        The units for the timeout
      * @param recursive    Whether the menu should recursively listen for actions
      * @param ephemeral    Whether menus that reply to interactions should be ephemeral
+     * @param initialMessage The initial message that should be sent with the components
      */
-    public Menu(EventWaiter eventWaiter, List<User> allowedUsers, List<Role> allowedRoles, long timeout, TimeUnit units, boolean recursive, boolean ephemeral) {
+    public Menu(EventWaiter eventWaiter, List<User> allowedUsers, List<Role> allowedRoles, long timeout, TimeUnit units, boolean recursive, boolean ephemeral, MessageCreateData initialMessage) {
         this.eventWaiter = eventWaiter;
         this.allowedUsers = allowedUsers;
         this.allowedRoles = allowedRoles;
@@ -44,6 +45,7 @@ public abstract class Menu {
         this.units = units;
         this.recursive = recursive;
         this.ephemeral = ephemeral;
+        this.initialMessage = initialMessage;
     }
 
     /**
@@ -77,7 +79,11 @@ public abstract class Menu {
         if (guild == null || !guild.isMember(user))
             return false;
 
-        return guild.getMember(user).getRoles().stream().anyMatch(allowedRoles::contains);
+        Member member = guild.getMember(user);
+
+        if (member == null) return false;
+
+        return member.getRoles().stream().anyMatch(allowedRoles::contains);
     }
 
     /**
@@ -108,6 +114,7 @@ public abstract class Menu {
         protected TimeUnit units = TimeUnit.MINUTES;
         protected boolean recursive = true;
         protected boolean ephemeral = false;
+        protected MessageCreateData initialMessage = null;
 
         /**
          * @return The built menu
@@ -195,5 +202,34 @@ public abstract class Menu {
             this.ephemeral = ephemeral;
             return (B) this;
         }
+
+        /**
+         * @param initialMessage Sets the initial message that should be sent with the components
+         * @return Itself for chaining convenience
+         */
+        public B setInitialMessage(MessageCreateData initialMessage) {
+            this.initialMessage = initialMessage;
+            return (B) this;
+        }
+
+        /**
+         * @param content Sets the initial message (plain text) that should be sent with the components
+         * @return Itself for chaining convenience
+         */
+        public B setInitialMessage(String content) {
+            this.initialMessage = MessageCreateData.fromContent(content);
+            return (B) this;
+        }
+
+
+        /**
+         * @param embed Sets the initial message (embed) that should be sent with the components
+         * @return Itself for chaining convenience
+         */
+        public B setInitialMessage(MessageEmbed... embed) {
+            this.initialMessage = MessageCreateData.fromEmbeds(embed);
+            return (B) this;
+        }
+
     }
 }

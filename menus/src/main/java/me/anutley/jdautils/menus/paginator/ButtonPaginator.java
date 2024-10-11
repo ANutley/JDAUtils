@@ -23,8 +23,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class ButtonPaginator extends Paginator<Button> {
 
-    public ButtonPaginator(EventWaiter eventWaiter, List<User> allowedUsers, List<Role> allowedRoles, long timeout, TimeUnit units, boolean recursive, boolean ephemeral, List<MessageCreateData> pages) {
-        super(eventWaiter, allowedUsers, allowedRoles, timeout, units, recursive, ephemeral, pages);
+    public ButtonPaginator(EventWaiter eventWaiter, List<User> allowedUsers, List<Role> allowedRoles, long timeout, TimeUnit units, boolean recursive, boolean ephemeral, MessageCreateData initialMessage, List<MessageCreateData> pages) {
+        super(eventWaiter, allowedUsers, allowedRoles, timeout, units, recursive, ephemeral, initialMessage, pages);
     }
 
     @Override
@@ -80,17 +80,17 @@ public class ButtonPaginator extends Paginator<Button> {
 
     @Override
     public Button getNextButton() {
-        return Button.primary("next", Emoji.fromUnicode("\u27A1")).withDisabled(isEnd());
+        return Button.primary("next", Emoji.fromUnicode("➡")).withDisabled(isEnd());
     }
 
     @Override
     public Button getPrevButton() {
-        return Button.primary("prev", Emoji.fromUnicode("\u2B05")).withDisabled(isStart());
+        return Button.primary("prev", Emoji.fromUnicode("⬅")).withDisabled(isStart());
     }
 
     @Override
     public Button getStopButton() {
-        return Button.secondary("stop", Emoji.fromUnicode("\u23F9"));
+        return Button.secondary("stop", Emoji.fromUnicode("⏹"));
     }
 
     @Override
@@ -105,7 +105,7 @@ public class ButtonPaginator extends Paginator<Button> {
         public ButtonPaginator build() {
 
             if (eventWaiter == null) throw new IllegalStateException("The Event Waiter must be set!");
-            if (pages.size() == 0) throw new IllegalStateException("There must be at least one page");
+            if (pages.isEmpty()) throw new IllegalStateException("There must be at least one page");
 
             return new ButtonPaginator(
                     super.eventWaiter,
@@ -115,6 +115,7 @@ public class ButtonPaginator extends Paginator<Button> {
                     super.units,
                     super.recursive,
                     super.ephemeral,
+                    super.initialMessage,
                     super.pages
             );
         }

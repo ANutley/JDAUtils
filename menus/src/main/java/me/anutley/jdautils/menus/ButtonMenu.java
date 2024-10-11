@@ -18,13 +18,11 @@ import java.util.function.Consumer;
 
 public class ButtonMenu extends Menu {
 
-    protected final MessageCreateData initialMessage;
     protected final Consumer<ButtonInteractionEvent> action;
     protected final List<ActionRow> actionRows;
 
     public ButtonMenu(EventWaiter eventWaiter, List<User> allowedUsers, List<Role> allowedRoles, long timeout, TimeUnit units, boolean recursive, boolean ephemeral, MessageCreateData initialMessage, Consumer<ButtonInteractionEvent> action, List<ActionRow> actionRows) {
-        super(eventWaiter, allowedUsers, allowedRoles, timeout, units, recursive, ephemeral);
-        this.initialMessage = initialMessage;
+        super(eventWaiter, allowedUsers, allowedRoles, timeout, units, recursive, ephemeral, initialMessage);
         this.action = action;
         this.actionRows = actionRows;
     }
@@ -67,7 +65,6 @@ public class ButtonMenu extends Menu {
 
     public static class Builder extends Menu.Builder<Builder, ButtonMenu> {
 
-        protected MessageCreateData initialMessage = null;
         protected Consumer<ButtonInteractionEvent> action = null;
         protected List<ActionRow> actionRows = new ArrayList<>();
 
@@ -87,19 +84,10 @@ public class ButtonMenu extends Menu {
                     super.units,
                     super.recursive,
                     super.ephemeral,
-                    initialMessage,
+                    super.initialMessage,
                     action,
                     actionRows
             );
-        }
-
-        /**
-         * @param initialMessage Sets the initial message that should be sent with the components
-         * @return Itself for chaining convenience
-         */
-        public Builder setInitialMessage(MessageCreateData initialMessage) {
-            this.initialMessage = initialMessage;
-            return this;
         }
 
         /**

@@ -18,13 +18,11 @@ import java.util.function.Consumer;
 
 public class ReactionMenu extends Menu {
 
-    protected final MessageCreateData initialMessage;
     protected final Consumer<MessageReactionAddEvent> action;
     protected final List<String> reactions;
 
     public ReactionMenu(EventWaiter eventWaiter, List<User> allowedUsers, List<Role> allowedRoles, long timeout, TimeUnit units, boolean recursive, boolean ephemeral, MessageCreateData initialMessage, Consumer<MessageReactionAddEvent> action, List<String> reactions) {
-        super(eventWaiter, allowedUsers, allowedRoles, timeout, units, recursive, ephemeral);
-        this.initialMessage = initialMessage;
+        super(eventWaiter, allowedUsers, allowedRoles, timeout, units, recursive, ephemeral, initialMessage);
         this.action = action;
         this.reactions = reactions;
     }
@@ -69,7 +67,6 @@ public class ReactionMenu extends Menu {
 
     public static class Builder extends Menu.Builder<ReactionMenu.Builder, ReactionMenu> {
 
-        protected MessageCreateData initialMessage = null;
         protected Consumer<MessageReactionAddEvent> action = null;
         protected List<String> reactions = new ArrayList<>();
 
@@ -77,7 +74,7 @@ public class ReactionMenu extends Menu {
         public ReactionMenu build() {
 
             if (eventWaiter == null) throw new IllegalStateException("The Event Waiter must be set!");
-            if (reactions.size() == 0) throw new IllegalStateException("There must be at least one reaction");
+            if (reactions.isEmpty()) throw new IllegalStateException("There must be at least one reaction");
             if (action == null) throw new IllegalStateException("There must be a callback action");
             if (initialMessage == null) throw new IllegalStateException("There must be an initial message");
 
@@ -89,19 +86,10 @@ public class ReactionMenu extends Menu {
                     super.units,
                     super.recursive,
                     super.ephemeral,
-                    initialMessage,
+                    super.initialMessage,
                     action,
                     reactions
             );
-        }
-
-        /**
-         * @param initialMessage Sets the initial message that should be sent with the components
-         * @return Itself for chaining convenience
-         */
-        public Builder setInitialMessage(MessageCreateData initialMessage) {
-            this.initialMessage = initialMessage;
-            return this;
         }
 
         /**

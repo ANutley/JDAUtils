@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class Paginator<T> extends Menu {
 
-    protected List<MessageCreateData> pages;
+    protected final List<MessageCreateData> pages;
     protected int index = 0;
 
     /**
@@ -33,10 +33,11 @@ public abstract class Paginator<T> extends Menu {
      * @param units        The units for the timeout
      * @param recursive    Whether the menu should recursively listen for actions
      * @param ephemeral    Whether menus that reply to interactions should be ephemeral
-     * @param pages        A list of Message's which the paginator should use for its content
+     * @param initialMessage The initial message that should be sent with the components
+     * @param pages        A list of Messages which the paginator should use for its content
      */
-    public Paginator(EventWaiter eventWaiter, List<User> allowedUsers, List<Role> allowedRoles, long timeout, TimeUnit units, boolean recursive, boolean ephemeral, List<MessageCreateData> pages) {
-        super(eventWaiter, allowedUsers, allowedRoles, timeout, units, recursive, ephemeral);
+    public Paginator(EventWaiter eventWaiter, List<User> allowedUsers, List<Role> allowedRoles, long timeout, TimeUnit units, boolean recursive, boolean ephemeral, MessageCreateData initialMessage, List<MessageCreateData> pages) {
+        super(eventWaiter, allowedUsers, allowedRoles, timeout, units, recursive, ephemeral, initialMessage);
         this.pages = pages;
     }
 
@@ -155,6 +156,17 @@ public abstract class Paginator<T> extends Menu {
          */
         public B addPage(MessageEmbed messageEmbed) {
             this.pages.add(new MessageCreateBuilder().addEmbeds(messageEmbed).build());
+            return (B) this;
+        }
+
+        /**
+         * This method is the same as just using {@link #addPage(MessageCreateData)} for the first time but keeping it here for consistency
+         * @param initialMessage The initial message of the paginator
+         * @return Itself for chaining convenience
+         */
+        @Override
+        public B setInitialMessage(MessageCreateData initialMessage) {
+            pages.set(0, initialMessage);
             return (B) this;
         }
 

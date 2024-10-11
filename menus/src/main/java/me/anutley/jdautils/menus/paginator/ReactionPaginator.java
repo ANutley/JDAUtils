@@ -22,8 +22,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class ReactionPaginator extends Paginator<String> {
 
-    public ReactionPaginator(EventWaiter eventWaiter, List<User> allowedUsers, List<Role> allowedRoles, long timeout, TimeUnit units, boolean recursive, boolean ephemeral, List<MessageCreateData> pages) {
-        super(eventWaiter, allowedUsers, allowedRoles, timeout, units, recursive, ephemeral, pages);
+    public ReactionPaginator(EventWaiter eventWaiter, List<User> allowedUsers, List<Role> allowedRoles, long timeout, TimeUnit units, boolean recursive, boolean ephemeral, MessageCreateData initialMessage, List<MessageCreateData> pages) {
+        super(eventWaiter, allowedUsers, allowedRoles, timeout, units, recursive, ephemeral, initialMessage, pages);
     }
 
     @Override
@@ -78,17 +78,17 @@ public class ReactionPaginator extends Paginator<String> {
 
     @Override
     public String getNextButton() {
-        return "\u27A1";
+        return "➡";
     }
 
     @Override
     public String getPrevButton() {
-        return "\u2B05";
+        return "⬅";
     }
 
     @Override
     public String getStopButton() {
-        return "\u23F9";
+        return "⏹";
     }
 
     @Override
@@ -103,7 +103,7 @@ public class ReactionPaginator extends Paginator<String> {
         public ReactionPaginator build() {
 
             if (eventWaiter == null) throw new IllegalStateException("The Event Waiter must be set!");
-            if (pages.size() == 0) throw new IllegalStateException("There must be at least one page");
+            if (pages.isEmpty()) throw new IllegalStateException("There must be at least one page");
 
             return new ReactionPaginator(
                     super.eventWaiter,
@@ -113,6 +113,7 @@ public class ReactionPaginator extends Paginator<String> {
                     super.units,
                     super.recursive,
                     super.ephemeral,
+                    super.initialMessage,
                     super.pages
             );
         }

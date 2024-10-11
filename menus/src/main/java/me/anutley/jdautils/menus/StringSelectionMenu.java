@@ -19,13 +19,11 @@ import java.util.function.Consumer;
 // TODO implement other types of select menu or make this generic
 public class StringSelectionMenu extends Menu {
 
-    protected final MessageCreateData initialMessage;
     protected final Consumer<StringSelectInteractionEvent> action;
     protected final List<ActionRow> actionRows;
 
     public StringSelectionMenu(EventWaiter eventWaiter, List<User> allowedUsers, List<Role> allowedRoles, long timeout, TimeUnit units, boolean recursive, boolean ephemeral, MessageCreateData initialMessage, Consumer<StringSelectInteractionEvent> action, List<ActionRow> actionRows) {
-        super(eventWaiter, allowedUsers, allowedRoles, timeout, units, recursive, ephemeral);
-        this.initialMessage = initialMessage;
+        super(eventWaiter, allowedUsers, allowedRoles, timeout, units, recursive, ephemeral, initialMessage);
         this.action = action;
         this.actionRows = actionRows;
     }
@@ -66,7 +64,6 @@ public class StringSelectionMenu extends Menu {
 
     public static class Builder extends Menu.Builder<StringSelectionMenu.Builder, StringSelectionMenu> {
 
-        protected MessageCreateData initialMessage = null;
         protected Consumer<StringSelectInteractionEvent> action = null;
         protected List<ActionRow> actionRows = new ArrayList<>();
 
@@ -74,7 +71,7 @@ public class StringSelectionMenu extends Menu {
         public StringSelectionMenu build() {
 
             if (eventWaiter == null) throw new IllegalStateException("The Event Waiter must be set!");
-            if (actionRows.size() == 0) throw new IllegalStateException("There must be at least one action row");
+            if (actionRows.isEmpty()) throw new IllegalStateException("There must be at least one action row");
             if (action == null) throw new IllegalStateException("There must be a callback action");
             if (initialMessage == null) throw new IllegalStateException("There must be an initial message");
 
@@ -86,19 +83,10 @@ public class StringSelectionMenu extends Menu {
                     super.units,
                     super.recursive,
                     super.ephemeral,
-                    initialMessage,
+                    super.initialMessage,
                     action,
                     actionRows
             );
-        }
-
-        /**
-         * @param initialMessage Sets the initial message that should be sent with the components
-         * @return Itself for chaining convenience
-         */
-        public StringSelectionMenu.Builder setInitialMessage(MessageCreateData initialMessage) {
-            this.initialMessage = initialMessage;
-            return this;
         }
 
         /**
